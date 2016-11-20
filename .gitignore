@@ -16,6 +16,7 @@ data/*.mwm.osm2ft
 data/*.mwm.routing
 data/*.mwmmeta
 data/[!W]*.mwm
+data/*.dat
 
 # Compiled Python
 *.pyc
@@ -133,6 +134,9 @@ android/fabric.properties
 android/pushwoosh.properties
 android/res/values/google-service.xml
 server
+
+#Android studio
+android/.externalNativeBuild/
 
 *.li
 
