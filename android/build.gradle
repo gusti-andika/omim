@@ -87,6 +87,11 @@ android {
     versionName propVersionName
     minSdkVersion propMinSdkVersion.toInteger()
     targetSdkVersion propTargetSdkVersion.toInteger()
+
+    ndk {
+      abiFilters 'x86'
+    }
+
     applicationId project.ext.appId
     buildConfigField 'String', 'SUPPORT_MAIL', '"android@maps.me"'
     buildConfigField 'String', 'REVIEW_URL', '"market://details?id=com.mapswithme.maps.pro"'
@@ -116,7 +121,7 @@ android {
   }
 
   productFlavors {
-    google {
+    /*google {
       versionName = android.defaultConfig.versionName + '-Google'
       buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@maps.me"'
     }
@@ -161,7 +166,7 @@ android {
     lenovo {
       versionName = android.defaultConfig.versionName + '-Lenovo'
       android.sourceSets.lenovo.assets.srcDirs = ['flavors/mwm-ttf-assets']
-    }
+    }*/
 
     web {
       versionName = android.defaultConfig.versionName + '-Web'
@@ -169,7 +174,7 @@ android {
       android.sourceSets.web.assets.srcDirs = ['flavors/mwm-ttf-assets']
     }
 
-    nineApp {
+    /*nineApp {
       versionName = android.defaultConfig.versionName + '-9app'
       buildConfigField 'String', 'REVIEW_URL', '"http://www.9apps.com/android-apps/mapswithme-maps-pro/"'
       android.sourceSets.nineApp.assets.srcDirs = ['flavors/mwm-ttf-assets']
@@ -211,7 +216,7 @@ android {
       versionName = android.defaultConfig.versionName + '-Blackberry'
       android.sourceSets.blackberry.assets.srcDirs = ['flavors/mwm-ttf-assets']
       buildConfigField 'String', 'REVIEW_URL', '"https://appworld.blackberry.com/webstore/content/51013892"'
-    }
+    }*/
   }
 
   // Currently (as of 1.2.3 gradle plugin) ABI filters aren't supported inside of product flavors, so we cannot generate splitted builds only for Google build.
@@ -315,10 +320,15 @@ android {
     exclude 'lib/x86_64/libcrashlytics-envelope.so'
     exclude 'lib/x86_64/libcrashlytics.so'
   }
+  externalNativeBuild {
+    ndkBuild {
+      path 'jni/Android.mk'
+    }
+  }
 }
 
 // Tasks needed to compile NDK part
-apply plugin: 'base'
+/*apply plugin: 'base'
 
 project.ext.PARAM_PARALLEL_TASK_COUNT = '-j' + (Runtime.runtime.availableProcessors() + 1)
 project.ext.NDK_BUILD = android.getNdkDirectory().toString() + '/ndk-build'
@@ -380,7 +390,7 @@ task cppClean(type: Delete) << {
       delete "../../omim-android-${type.cppType}-${arch}"
     }
   }
-}
+}*/
 
 // Tasks for generating obb files for Google Play
 def unalignedFonts = "${propObbFontsOutput}.unaligned"
