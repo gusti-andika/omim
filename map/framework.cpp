@@ -4,6 +4,7 @@
 #include "map/geourl_process.hpp"
 #include "map/gps_tracker.hpp"
 #include "map/user_mark.hpp"
+#include "map/stationary_position_checker.hpp"
 
 #include "defines.hpp"
 #include "private.h"
@@ -123,13 +124,14 @@ char const kAllow3dBuildingsKey[] = "Buildings3d";
 char const kAllowAutoZoom[] = "AutoZoom";
 
 double const kDistEqualQueryMeters = 100.0;
-
 // Must correspond SearchMarkType.
 vector<string> kSearchMarks =
 {
   "search-result",
   "search-booking"
 };
+
+
 
 // TODO!
 // To adjust GpsTrackFilter was added secret command "?gpstrackaccuracy:xxx;"
@@ -169,6 +171,14 @@ pair<MwmSet::MwmId, MwmSet::RegResult> Framework::RegisterMap(
   return m_model.RegisterMap(localFile);
 }
 
+void Framework::OnPositionPaused(const GpsInfo &info) {
+    LOG(LDEBUG, ("PositionPaused At:", " lat:", info.m_latitude, ", lon:", info.m_longitude));
+}
+
+void Framework::OnPositionResumed(const GpsInfo &info) {
+    LOG(LDEBUG, ("PositionResumed At:", " lat:", info.m_latitude, ", lon:", info.m_longitude));
+}
+
 void Framework::OnLocationError(TLocationError /*error*/)
 {
   m_trafficManager.UpdateMyPosition(TrafficManager::MyPosition());
@@ -199,13 +209,17 @@ void Framework::OnLocationUpdate(GpsInfo const & info)
   GpsInfo rInfo(info);
 #endif
 
+  StationaryPositionChecker::Instance().CheckPositionStationary(rInfo);
+
   location::RouteMatchingInfo routeMatchingInfo;
   CheckLocationForRouting(rInfo);
 
   MatchLocationToRoute(rInfo, routeMatchingInfo);
 
+  GpsTracker::Instance().OnLocationUpdated(info);
+
   CallDrapeFunction(bind(&df::DrapeEngine::SetGpsInfo, _1, rInfo,
-                         m_routingSession.IsNavigable(), routeMatchingInfo));
+                         m_routingSession.IsNavigable() || GpsTracker::Instance().IsEnabled(), routeMatchingInfo));
   if (IsTrackingReporterEnabled())
     m_trackingReporter.AddLocation(info);
 }
@@ -436,6 +450,11 @@ Framework::Framework()
   m_model.GetIndex().AddObserver(editor);
 
   LOG(LINFO, ("Editor initialized"));
+
+  StationaryPositionChecker::Instance().SetCallbacks(
+              bind(&Framework::OnPositionPaused, this, _1),
+              bind(&Framework::OnPositionResumed, this, _1)
+         );
 }
 
 Framework::~Framework()
@@ -1713,7 +1732,6 @@ void Framework::SetRenderingDisabled(bool destroyContext)
 
 void Framework::ConnectToGpsTracker()
 {
-  m_connectToGpsTrack = true;
   if (m_drapeEngine)
   {
     m_drapeEngine->ClearGpsTrackPoints();
@@ -1723,7 +1741,6 @@ void Framework::ConnectToGpsTracker()
 
 void Framework::DisconnectFromGpsTracker()
 {
-  m_connectToGpsTrack = false;
   GpsTracker::Instance().Disconnect();
   if (m_drapeEngine)
     m_drapeEngine->ClearGpsTrackPoints();
@@ -1754,6 +1771,8 @@ void Framework::OnUpdateGpsTrackPointsCallback(vector<pair<size_t, location::Gps
     for (size_t i = toRemove.first; i <= toRemove.second; ++i)
       indicesRemove.emplace_back(i);
   }
+
+  LOG(LINFO, ("Points to add: ", pointsAdd.size(), ", Indices to remove:", indicesRemove.size()));
 
   m_drapeEngine->UpdateGpsTrackPoints(move(pointsAdd), move(indicesRemove));
 }
@@ -2641,6 +2660,9 @@ void Framework::Load3dMode(bool & allow3d, bool & allow3dBuildings)
 
   if (!settings::Get(kAllow3dBuildingsKey, allow3dBuildings))
     allow3dBuildings = true;
+
+  LOG(LINFO, ("settings:allow3d", " -> ", allow3d));
+  LOG(LINFO, ("settings:allow3dBuildings", " -> ", allow3dBuildings));
 }
 
 bool Framework::LoadAutoZoom()
