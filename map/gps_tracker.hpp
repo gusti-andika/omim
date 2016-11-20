@@ -4,6 +4,9 @@
 
 #include "std/atomic.hpp"
 
+#include "std/unique_ptr.hpp"
+
+class Framework;
 class GpsTracker
 {
 public:
@@ -20,12 +23,19 @@ public:
 
   void Connect(TGpsTrackDiffCallback const & fn);
   void Disconnect();
-
+  void Load(string const & trackFile);
+  void Start();
+  void Stop();
+  void Cancel();
   void OnLocationUpdated(location::GpsInfo const & info);
+  bool IsStarted();
+  void SetFramework(Framework &f);
 
 private:
   GpsTracker();
-
+  TGpsTrackDiffCallback m_trackDiffCallback;
   atomic<bool> m_enabled;
-  GpsTrack m_track;
+  unique_ptr<GpsTrack> m_track;
+  Framework *m_framework;
+  bool m_started;
 };

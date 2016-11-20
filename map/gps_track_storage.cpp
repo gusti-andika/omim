@@ -158,6 +158,13 @@ GpsTrackStorage::GpsTrackStorage(string const & filePath, size_t maxItemCount)
   }
 }
 
+GpsTrackStorage::~GpsTrackStorage()
+{
+    if(!m_saved) {
+        my::DeleteFileX(m_filePath);
+    }
+}
+
 void GpsTrackStorage::Append(vector<TItem> const & items)
 {
   ASSERT(m_stream.is_open(), ());

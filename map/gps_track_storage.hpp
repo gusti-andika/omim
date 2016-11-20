@@ -24,6 +24,7 @@ public:
   /// @param maxItemCount - max number of items in recycling file
   /// @exception OpenException if seek fails.
   GpsTrackStorage(string const & filePath, size_t maxItemCount);
+  ~GpsTrackStorage();
 
   /// Appends new point to the storage
   /// @param items - collection of gps track points.
@@ -39,11 +40,16 @@ public:
   /// @exceptions ReadException if read fails.
   void ForEach(std::function<bool(TItem const & item)> const & fn);
 
+  void Save() {
+      m_saved = true;
+  }
+
 private:
   DISALLOW_COPY_AND_MOVE(GpsTrackStorage);
 
   void TruncFile();
   size_t GetFirstItemIndex() const;
+  bool m_saved;
 
   string const m_filePath;
   size_t const m_maxItemCount;

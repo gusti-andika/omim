@@ -6,9 +6,12 @@
 #include "platform/platform.hpp"
 
 #include "std/atomic.hpp"
+#include "std/chrono.hpp"
 
 #include "defines.hpp"
+#include "base/logging.hpp"
 
+#include <ctime>
 namespace
 {
 
@@ -20,7 +23,8 @@ size_t constexpr kMaxItemCount = 100000; // > 24h with 1point/s
 
 inline string GetFilePath()
 {
-  return my::JoinFoldersToPath(GetPlatform().WritableDir(), GPS_TRACK_FILENAME);
+  string fileName = my::TimestampToString(time(NULL)) + ".dat";
+  return my::JoinFoldersToPath(GetPlatform().WritableDir(), fileName);
 }
 
 inline bool GetSettingsIsEnabled()
@@ -58,7 +62,7 @@ GpsTracker & GpsTracker::Instance()
 
 GpsTracker::GpsTracker()
   : m_enabled(GetSettingsIsEnabled())
-  , m_track(GetFilePath(), kMaxItemCount, GetSettingsDuration(), make_unique<GpsTrackFilter>())
+  , m_started(false)
 {
 }
 
@@ -70,8 +74,8 @@ void GpsTracker::SetEnabled(bool enabled)
   SetSettingsIsEnabled(enabled);
   m_enabled = enabled;
 
-  if (enabled)
-    m_track.Clear();
+  if (enabled && m_track)
+    m_track->Clear();
 }
 
 bool GpsTracker::IsEnabled() const
@@ -82,27 +86,84 @@ bool GpsTracker::IsEnabled() const
 void GpsTracker::SetDuration(hours duration)
 {
   SetSettingsDuration(duration);
-  m_track.SetDuration(duration);
+  if(m_track)
+    m_track->SetDuration(duration);
 }
 
 hours GpsTracker::GetDuration() const
 {
-  return m_track.GetDuration();
+  return m_track ? m_track->GetDuration() : hours(0) ;
 }
 
 void GpsTracker::Connect(TGpsTrackDiffCallback const & fn)
 {
-  m_track.SetCallback(fn);
+  m_trackDiffCallback = fn;
+  if (m_track)
+    m_track->SetCallback(fn);
 }
 
 void GpsTracker::Disconnect()
 {
-  m_track.SetCallback(nullptr);
+  if(m_track)
+    m_track->SetCallback(nullptr);
 }
 
 void GpsTracker::OnLocationUpdated(location::GpsInfo const & info)
 {
-  if (!m_enabled)
+  if (!m_enabled || !m_track)
     return;
-  m_track.AddPoint(info);
+  m_track->AddPoint(info);
+}
+
+void GpsTracker::Load(string const & trackFile)
+{
+    m_started = false;
+    m_framework->GetDrapeEngine()->ClearGpsTrackPoints();
+    m_track.reset(new GpsTrack(trackFile,
+                               kMaxItemCount,
+                               GetSettingsDuration(),
+                               make_unique<GpsTrackNullFilter>()));
+
+    m_track->SetCallback(m_trackDiffCallback);
+}
+
+void GpsTracker::Start()
+{
+    if(m_started)
+        return;
+    m_track.reset(new GpsTrack(GetFilePath(),
+                               kMaxItemCount,
+                               GetSettingsDuration(),
+                               make_unique<GpsTrackNullFilter>()));
+    m_track->SetCallback(m_trackDiffCallback);
+    m_started = true;
+}
+
+void GpsTracker::Stop()
+{
+    if (!m_started || !m_track)
+        return;
+
+    m_track->Save();
+    m_track.reset();
+    m_framework->GetDrapeEngine()->ClearGpsTrackPoints();
+}
+
+void GpsTracker::Cancel()
+{
+    if (!m_started)
+        return;
+
+    m_track.reset();
+    m_framework->GetDrapeEngine()->ClearGpsTrackPoints();
+}
+
+bool GpsTracker::IsStarted()
+{
+    return m_started;
+}
+
+void GpsTracker::SetFramework(Framework &f)
+{
+    m_framework = &f;
 }

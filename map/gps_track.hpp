@@ -54,6 +54,8 @@ public:
   /// next time callbacks it receives only modifications. It simplifies getter/callback model.
   void SetCallback(TGpsTrackDiffCallback callback);
 
+  void Save();
+
 private:
   DISALLOW_COPY_AND_MOVE(GpsTrack);
 

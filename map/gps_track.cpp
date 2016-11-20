@@ -2,7 +2,7 @@
 
 #include "base/assert.hpp"
 #include "base/logging.hpp"
-
+#include <iostream>
 namespace
 {
 
@@ -344,4 +344,12 @@ void GpsTrack::NotifyCallback(pair<size_t, size_t> const & addedIds, pair<size_t
 
     m_callback(move(toAdd), evictedIds);
   }
+}
+
+void GpsTrack::Save()
+{
+    if (!m_storage)
+        return;
+
+    m_storage->Save();
 }
