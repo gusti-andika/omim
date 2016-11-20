@@ -378,7 +378,7 @@ void DrawWidget::mousePressEvent(QMouseEvent * e)
   {
     if (IsShiftModifier(e))
       SubmitRoutingPoint(pt);
-    else if (IsAltModifier(e))
+    else if (IsCommandModifier(e))
       SubmitFakeLocationPoint(pt);
     else
       m_framework->TouchEvent(GetTouchEvent(e, df::TouchEvent::TOUCH_DOWN));
