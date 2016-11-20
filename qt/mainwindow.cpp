@@ -10,6 +10,7 @@
 
 #include "platform/settings.hpp"
 #include "platform/platform.hpp"
+#include "map/gps_tracker.hpp"
 
 #include "std/bind.hpp"
 #include "std/sstream.hpp"
@@ -53,6 +54,10 @@
 
 #endif // NO_DOWNLOADER
 
+QAction * showTrackerListAction;
+QAction * startTrackerAction;
+QAction * stopTrackerAction;
+QAction * cancelTrackerAction;
 
 namespace qt
 {
@@ -99,6 +104,17 @@ MainWindow::MainWindow() : m_locationService(CreateDesktopLocationService(*this)
   setWindowIcon(QIcon(":/ui/logo.png"));
 
 #ifndef OMIM_OS_WINDOWS
+  QMenu * trackerMenu = new QMenu(tr("Tracker"), this);
+  menuBar()->addMenu(trackerMenu);
+  showTrackerListAction = trackerMenu->addAction(tr("Show List"), this, SLOT(OnShowTrackerList()));
+  trackerMenu->addSeparator();
+  startTrackerAction = trackerMenu->addAction(tr("Start"), this, SLOT(OnTrackerStart()));
+  stopTrackerAction = trackerMenu->addAction(tr("Stop"), this, SLOT(OnTrackerStop()));
+  cancelTrackerAction = trackerMenu->addAction(tr("Cancel"), this, SLOT(OnTrackerCancel()));
+
+  stopTrackerAction->setEnabled(false);
+  cancelTrackerAction->setEnabled(false);
+
   QMenu * helpMenu = new QMenu(tr("Help"), this);
   menuBar()->addMenu(helpMenu);
   helpMenu->addAction(tr("About"), this, SLOT(OnAbout()));
@@ -317,6 +333,14 @@ void MainWindow::CreateNavigationBar()
     m_pMyPositionAction->setToolTip(tr("My Position"));
 // #endif
 
+
+    m_runGpxPlayback = pToolBar->addAction(QIcon(":/navig64/play.png"),
+                                           tr("My Position"),
+                                           this,
+                                           SLOT(OnPlayGpx()));
+    m_runGpxPlayback->setCheckable(true);
+    m_runGpxPlayback->setToolTip(tr("Run GPX Playback"));
+
     // add view actions 1
     button_t arr[] = {
       { QString(), 0, 0 },
@@ -440,6 +464,14 @@ void MainWindow::OnAbout()
 {
   AboutDialog dlg(this);
   dlg.exec();
+}
+
+void MainWindow::OnPlayGpx()
+{
+    static const string gpxPath = "/home/andika/Downloads/2305421.gpx";
+    m_gpxPlayback.reset(new gpx::GpxPlayback(gpxPath, m_pDrawWidget->GetFramework()));
+    m_gpxPlayback->SetOnLocationUpdateCallback(std::bind(&MainWindow::OnLocationUpdated, this, _1));
+    m_gpxPlayback->Play();
 }
 
 void MainWindow::OnLocationError(location::TLocationError errorCode)
@@ -587,5 +619,26 @@ void MainWindow::OnRetryDownloadClicked()
 {
   m_pDrawWidget->RetryToDownloadCountry(m_lastCountry);
 }
+
+void MainWindow::OnShowTrackerList()
+{
+
+}
+
+void MainWindow::OnTrackerStart()
+{
+    GpsTracker::Instance().Start();
+}
+
+void MainWindow::OnTrackerStop()
+{
+    GpsTracker::Instance().Stop();
+}
+
+void MainWindow::OnTrackerCancel()
+{
+    GpsTracker::Instance().Cancel();
+}
+
 
 }

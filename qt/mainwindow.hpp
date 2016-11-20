@@ -14,6 +14,8 @@
   #include <QtWidgets/QMainWindow>
 #endif
 
+#include "qt/gpx_playback.hpp"
+
 class QDockWidget;
 class QPushButton;
 class QLabel;
@@ -31,6 +33,7 @@ namespace qt
     QAction * m_selectionMode;
     QAction * m_clearSelection;
     QAction * m_pSearchAction;
+    QAction * m_runGpxPlayback;
     DrawWidget * m_pDrawWidget;
 
     QDockWidget * m_Docks[1];
@@ -41,7 +44,7 @@ namespace qt
     storage::TCountryId m_lastCountry;
 
     unique_ptr<location::LocationService> const m_locationService;
-
+    unique_ptr<gpx::GpxPlayback> m_gpxPlayback;
     Q_OBJECT
 
   public:
@@ -74,6 +77,7 @@ namespace qt
     void ShowUpdateDialog();
 #endif // NO_DOWNLOADER
 
+    void OnPlayGpx();
     void OnPreferences();
     void OnAbout();
     void OnMyPosition();
@@ -89,5 +93,10 @@ namespace qt
 
     void OnSwitchSelectionMode();
     void OnClearSelection();
+
+    void OnShowTrackerList();
+    void OnTrackerStart();
+    void OnTrackerStop();
+    void OnTrackerCancel();
   };
 }
