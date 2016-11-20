@@ -1,3 +1,4 @@
+#!/bin/bash
 cd ..
 
 rm -rf assets/
@@ -45,7 +46,7 @@ cp -r ../data/countries-strings/ assets/
 cp -r ../data/cuisine-strings/ assets/
 
 rm -rf flavors/mwm-ttf-assets
-mkdir flavors\\mwm-ttf-assets
+mkdir flavors/mwm-ttf-assets
 cp ../data/01_dejavusans.ttf flavors/mwm-ttf-assets/
 cp ../data/02_droidsans-fallback.ttf flavors/mwm-ttf-assets/
 cp ../data/03_jomolhari-id-a3d.ttf flavors/mwm-ttf-assets/
@@ -58,9 +59,9 @@ cp ../data/WorldCoasts.mwm flavors/mwm-ttf-assets/
 cp ../data/WorldCoasts_obsolete.mwm flavors/mwm-ttf-assets/
 
 rm -rf res/values-zh-rHK/
-mkdir res\\values-zh-rHK
+mkdir res/values-zh-rHK
 cp res/values-zh-rTW/strings.xml res/values-zh-rHK/
 
 rm -rf res/values-zh-rMO/
-mkdir res\\values-zh-rMO
+mkdir res/values-zh-rMO
 cp res/values-zh-rTW/strings.xml res/values-zh-rMO/
