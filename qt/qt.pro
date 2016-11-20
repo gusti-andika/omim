@@ -117,6 +117,8 @@ SOURCES += \
     search_panel.cpp \
     slider_ctrl.cpp \
     update_dialog.cpp \
+    gpx_parser.cpp \
+    gpx_playback.cpp
 
 HEADERS += \
     about.hpp \
@@ -134,5 +136,7 @@ HEADERS += \
     search_panel.hpp \
     slider_ctrl.hpp \
     update_dialog.hpp \
+    gpx_parser.hpp \
+    gpx_playback.hpp
 
 RESOURCES += res/resources.qrc
