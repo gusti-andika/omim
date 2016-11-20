@@ -1,1 +1,2 @@
-../../data/fonts_blacklist.txt
+Basic_Latin 06_umpush.ttf
+
