@@ -32,7 +32,8 @@ namespace location
     EAndroidNative,
     EGoogle,
     ETizen,
-    EPredictor
+    EPredictor,
+    EGPX
   };
 
   /// Our structure ALWAYS has valid lat, lon and horizontal accuracy.
@@ -59,6 +60,17 @@ namespace location
     //bool HasAltitude() const { return m_verticalAccuracy >= 0.0; }
     bool HasBearing() const  { return m_bearing >= 0.0; }
     bool HasSpeed() const    { return m_speed >= 0.0; }
+    friend std::ostream & operator<<(std::ostream &out, const GpsInfo &info) {
+        out<<"m_timestamp: "<<info.m_timestamp<<std::endl;
+        out<<"m_latitude: "<<info.m_latitude<<std::endl;
+        out<<"m_longitude: "<<info.m_longitude<<std::endl;
+        out<<"m_horizontalAccuracy: "<<info.m_horizontalAccuracy<<std::endl;
+        out<<"m_altitude: "<<info.m_altitude<<std::endl;
+        out<<"m_verticalAccuracy: "<<info.m_verticalAccuracy<<std::endl;
+        out<<"m_bearing: "<<info.m_bearing<<std::endl;
+        out<<"m_speed: "<<info.m_speed<<std::endl;
+        return out;
+    }
   };
 
   /// GpsTrackInfo struct describes a point for GPS tracking
