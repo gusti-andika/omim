@@ -40,7 +40,6 @@ extern "C"
     LOG_MEMORY_INFO();
     if (g_framework)
       g_framework->OnLocationUpdated(info);
-    GpsTracker::Instance().OnLocationUpdated(info);
   }
 
   JNIEXPORT jfloatArray JNICALL
