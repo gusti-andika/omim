@@ -146,7 +146,7 @@ inline string DebugPrint(unordered_map<Key, T, Hash, Pred> const & v)
 template <typename T> inline string DebugPrint(T const & t)
 {
   ostringstream out;
-  out << t;
+  out << std::fixed << t;
   return out.str();
 }
 
