@@ -4,12 +4,25 @@
 
 #include "std/atomic.hpp"
 
+#include "drape/pointers.hpp"
 #include "std/unique_ptr.hpp"
+
+namespace df{
+class DrapeEngine;
+}
 
 class Framework;
 class GpsTracker
 {
 public:
+
+    class ActivationListener
+    {
+    public:
+        virtual void OnTrackingStarted() = 0;
+        virtual void OnTrackingStopped(bool cancelled=false) = 0;
+    };
+
   static GpsTracker & Instance();
 
   bool IsEnabled() const;
@@ -29,13 +42,20 @@ public:
   void Cancel();
   void OnLocationUpdated(location::GpsInfo const & info);
   bool IsStarted();
-  void SetFramework(Framework &f);
+  void SetEngine(ref_ptr<df::DrapeEngine> drape) {
+      m_engine = drape;
+  }
+
+  void SetListener(ActivationListener *listener) {
+      m_listener = listener;
+  }
 
 private:
   GpsTracker();
   TGpsTrackDiffCallback m_trackDiffCallback;
   atomic<bool> m_enabled;
   unique_ptr<GpsTrack> m_track;
-  Framework *m_framework;
+  ref_ptr<df::DrapeEngine> m_engine;
+  ActivationListener *m_listener;
   bool m_started;
 };

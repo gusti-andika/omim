@@ -1687,6 +1687,7 @@ void Framework::CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory,
 
   m_drapeApi.SetEngine(make_ref(m_drapeEngine));
   m_trafficManager.SetDrapeEngine(make_ref(m_drapeEngine));
+  GpsTracker::Instance().SetEngine(make_ref(m_drapeEngine));
 }
 
 void Framework::UpdateDrapeEngine(int width, int height)

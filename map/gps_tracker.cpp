@@ -1,6 +1,6 @@
 #include "map/gps_tracker.hpp"
 #include "map/framework.hpp"
-
+#include "drape_frontend/drape_engine.hpp"
 #include "coding/file_name_utils.hpp"
 
 #include "platform/platform.hpp"
@@ -62,7 +62,7 @@ GpsTracker & GpsTracker::Instance()
 
 GpsTracker::GpsTracker()
   : m_enabled(GetSettingsIsEnabled())
-  , m_started(false)
+  , m_started(false), m_listener(nullptr)
 {
 }
 
@@ -118,7 +118,7 @@ void GpsTracker::OnLocationUpdated(location::GpsInfo const & info)
 void GpsTracker::Load(string const & trackFile)
 {
     m_started = false;
-    m_framework->GetDrapeEngine()->ClearGpsTrackPoints();
+    m_engine->ClearGpsTrackPoints();
     m_track.reset(new GpsTrack(trackFile,
                                kMaxItemCount,
                                GetSettingsDuration(),
@@ -137,6 +137,8 @@ void GpsTracker::Start()
                                make_unique<GpsTrackNullFilter>()));
     m_track->SetCallback(m_trackDiffCallback);
     m_started = true;
+    if (m_listener)
+        m_listener->OnTrackingStarted();
 }
 
 void GpsTracker::Stop()
@@ -146,7 +148,10 @@ void GpsTracker::Stop()
 
     m_track->Save();
     m_track.reset();
-    m_framework->GetDrapeEngine()->ClearGpsTrackPoints();
+    m_engine->ClearGpsTrackPoints();
+    if (m_listener)
+        m_listener->OnTrackingStopped();
+    m_started = false;
 }
 
 void GpsTracker::Cancel()
@@ -155,7 +160,10 @@ void GpsTracker::Cancel()
         return;
 
     m_track.reset();
-    m_framework->GetDrapeEngine()->ClearGpsTrackPoints();
+    m_engine->ClearGpsTrackPoints();
+    if (m_listener)
+        m_listener->OnTrackingStopped(true);
+    m_started = false;
 }
 
 bool GpsTracker::IsStarted()
@@ -163,7 +171,4 @@ bool GpsTracker::IsStarted()
     return m_started;
 }
 
-void GpsTracker::SetFramework(Framework &f)
-{
-    m_framework = &f;
-}
+

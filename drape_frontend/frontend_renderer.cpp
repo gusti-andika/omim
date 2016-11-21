@@ -668,6 +668,7 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
   case Message::ClearGpsTrackPoints:
     {
       m_gpsTrackRenderer->Clear();
+      m_gpsTrackRenderer->ClearRenderData();
       break;
     }
 

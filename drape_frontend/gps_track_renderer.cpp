@@ -324,6 +324,7 @@ void GpsTrackRenderer::Update()
 void GpsTrackRenderer::Clear()
 {
   m_points.clear();
+  m_pointsSpline = m2::Spline();
   m_needUpdate = true;
 }
 

@@ -18,7 +18,7 @@ public:
         PLAYING
     };
 
-    GpxPlayback(const string & filePath, Framework & framework);
+    GpxPlayback(const string & filePath);
     ~GpxPlayback();
     void Play();
     void Stop();
@@ -39,7 +39,6 @@ private:
   my::Timer m_timer;
   State m_state;
   TOnLocationUpdateCallback m_callback;
-  Framework &m_framework;
 };
 
 }
