@@ -36,6 +36,7 @@ public:
   void Clear();
   void ClearRenderData();
 
+  const m2::RectD& GetRect();
 private:
   float CalculateRadius(ScreenBase const & screen) const;
   size_t GetAvailablePointsCount() const;
@@ -52,6 +53,7 @@ private:
   vector<pair<GpsTrackHandle*, size_t>> m_handlesCache;
   float m_radius;
   m2::PointD m_pivot;
+  m2::RectD m_rect;
 };
 
 } // namespace df

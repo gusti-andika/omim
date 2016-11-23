@@ -124,8 +124,12 @@ void GpsTrackRenderer::UpdatePoints(vector<GpsTrackPoint> const & toAdd, vector<
   if (wasChanged)
   {
     m_pointsSpline = m2::Spline(m_points.size());
-    for (size_t i = 0; i < m_points.size(); i++)
+    for (size_t i = 0; i < m_points.size(); i++) {
+      LOG(LDEBUG, (m2::DebugPrint(m_points[i].m_point)));
+      m_rect.Add(m_points[i].m_point);
+      LOG(LDEBUG, (m2::DebugPrint(m_rect)));
       m_pointsSpline.AddPoint(m_points[i].m_point);
+    }
   }
 
   m_needUpdate = true;
@@ -324,8 +328,14 @@ void GpsTrackRenderer::Update()
 void GpsTrackRenderer::Clear()
 {
   m_points.clear();
+  m_rect.MakeEmpty();
   m_pointsSpline = m2::Spline();
   m_needUpdate = true;
+}
+
+const m2::RectD& GpsTrackRenderer::GetRect()
+{
+    return m_rect;
 }
 
 } // namespace df

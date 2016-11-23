@@ -470,6 +470,13 @@ void DrapeEngine::ClearGpsTrackPoints()
                                   MessagePriority::Normal);
 }
 
+void DrapeEngine::ShowGpsTrackPointsRect()
+{
+  m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
+                                  make_unique_dp<ShowGpsTrackPointsRectMessage>(),
+                                  MessagePriority::Normal);
+}
+
 void DrapeEngine::EnableChoosePositionMode(bool enable, vector<m2::TriangleD> && boundAreaTriangles,
                                            bool hasPosition, m2::PointD const & position)
 {

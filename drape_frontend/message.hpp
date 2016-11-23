@@ -55,6 +55,7 @@ public:
     FlushGpsTrackPoints,
     UpdateGpsTrackPoints,
     ClearGpsTrackPoints,
+    ShowGpsTrackPointsRect,
     ShowChoosePositionMark,
     SetKineticScrollEnabled,
     BlockTapEvents,

@@ -672,6 +672,21 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       break;
     }
 
+  case Message::ShowGpsTrackPointsRect:
+    {
+      //AddUserEvent(make_unique_dp<SetVisibleViewportEvent>(m_gpsTrackRenderer->GetRect()));
+      m2::RectD rect = m_gpsTrackRenderer->GetRect();
+      double dx = rect.SizeX() * 0.2;
+      double dy = rect.SizeY() * 0.2;
+
+      m2::RectD rect2 = rect;
+      rect2.SetSizes(rect.SizeX() + dx, rect.SizeY() + dy);
+
+      AddUserEvent(make_unique_dp<SetRectEvent>(rect2, false,
+                                                -1, true));
+      break;
+    }
+
   case Message::BlockTapEvents:
     {
       ref_ptr<BlockTapEventsMessage> msg = message;

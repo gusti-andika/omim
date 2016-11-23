@@ -940,6 +940,15 @@ public:
 
 };
 
+class ShowGpsTrackPointsRectMessage : public Message
+{
+public:
+  ShowGpsTrackPointsRectMessage() = default;
+
+  Type GetType() const override { return Message::ShowGpsTrackPointsRect; }
+
+};
+
 class SetTimeInBackgroundMessage : public Message
 {
 public:
