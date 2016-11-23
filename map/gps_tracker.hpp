@@ -3,6 +3,7 @@
 #include "map/gps_track.hpp"
 
 #include "std/atomic.hpp"
+#include "std/mutex.hpp"
 
 #include "drape/pointers.hpp"
 #include "std/unique_ptr.hpp"
@@ -58,4 +59,5 @@ private:
   ref_ptr<df::DrapeEngine> m_engine;
   ActivationListener *m_listener;
   bool m_started;
+  mutex m_mutex;
 };

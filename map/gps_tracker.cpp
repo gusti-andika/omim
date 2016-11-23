@@ -110,6 +110,7 @@ void GpsTracker::Disconnect()
 
 void GpsTracker::OnLocationUpdated(location::GpsInfo const & info)
 {
+  lock_guard<mutex> guard(m_mutex);
   if (!m_enabled || !m_track)
     return;
   m_track->AddPoint(info);
@@ -117,6 +118,7 @@ void GpsTracker::OnLocationUpdated(location::GpsInfo const & info)
 
 void GpsTracker::Load(string const & trackFile)
 {
+    lock_guard<mutex> guard(m_mutex);
     m_started = false;
     m_engine->ClearGpsTrackPoints();
     m_track.reset(new GpsTrack(trackFile,
@@ -129,6 +131,7 @@ void GpsTracker::Load(string const & trackFile)
 
 void GpsTracker::Start()
 {
+    lock_guard<mutex> guard(m_mutex);
     if(m_started)
         return;
     m_track.reset(new GpsTrack(GetFilePath(),
@@ -143,12 +146,14 @@ void GpsTracker::Start()
 
 void GpsTracker::Stop()
 {
+    lock_guard<mutex> guard(m_mutex);
     if (!m_started || !m_track)
         return;
 
     m_track->Save();
     m_track.reset();
-    m_engine->ClearGpsTrackPoints();
+    m_engine->LoseLocation();
+    m_engine->ShowGpsTrackPointsRect();
     if (m_listener)
         m_listener->OnTrackingStopped();
     m_started = false;
@@ -156,6 +161,7 @@ void GpsTracker::Stop()
 
 void GpsTracker::Cancel()
 {
+    lock_guard<mutex> guard(m_mutex);
     if (!m_started)
         return;
 

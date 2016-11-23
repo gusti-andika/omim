@@ -1773,7 +1773,6 @@ void Framework::OnUpdateGpsTrackPointsCallback(vector<pair<size_t, location::Gps
       indicesRemove.emplace_back(i);
   }
 
-  LOG(LINFO, ("Points to add: ", pointsAdd.size(), ", Indices to remove:", indicesRemove.size()));
 
   m_drapeEngine->UpdateGpsTrackPoints(move(pointsAdd), move(indicesRemove));
 }
