@@ -4,6 +4,7 @@
 
 #include "platform/location.hpp"
 #include "platform/location_service.hpp"
+#include "map/gps_tracker.hpp"
 
 #include "std/unique_ptr.hpp"
 
@@ -26,7 +27,7 @@ namespace qt
 {
   class DrawWidget;
 
-  class MainWindow : public QMainWindow, location::LocationObserver
+  class MainWindow : public QMainWindow, location::LocationObserver, GpsTracker::ActivationListener
   {
     QAction * m_pMyPositionAction;
     QAction * m_pCreateFeatureAction;
@@ -34,6 +35,10 @@ namespace qt
     QAction * m_clearSelection;
     QAction * m_pSearchAction;
     QAction * m_runGpxPlayback;
+    QAction * m_showTrackerListAction;
+    QAction * m_startTrackerAction;
+    QAction * m_stopTrackerAction;
+    QAction * m_cancelTrackerAction;
     DrawWidget * m_pDrawWidget;
 
     QDockWidget * m_Docks[1];
@@ -52,6 +57,9 @@ namespace qt
 
     virtual void OnLocationError(location::TLocationError errorCode);
     virtual void OnLocationUpdated(location::GpsInfo const & info);
+
+    virtual void OnTrackingStarted();
+    virtual void OnTrackingStopped(bool cancel=false);
 
   protected:
     string GetIniFile();

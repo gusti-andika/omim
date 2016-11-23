@@ -38,6 +38,7 @@
   #include <QtWidgets/QPushButton>
   #include <QtWidgets/QHBoxLayout>
   #include <QtWidgets/QLabel>
+  #include <QtWidgets/QFileDialog>
 #endif
 
 
@@ -53,11 +54,6 @@
 #include <QtCore/QFile>
 
 #endif // NO_DOWNLOADER
-
-QAction * showTrackerListAction;
-QAction * startTrackerAction;
-QAction * stopTrackerAction;
-QAction * cancelTrackerAction;
 
 namespace qt
 {
@@ -106,14 +102,14 @@ MainWindow::MainWindow() : m_locationService(CreateDesktopLocationService(*this)
 #ifndef OMIM_OS_WINDOWS
   QMenu * trackerMenu = new QMenu(tr("Tracker"), this);
   menuBar()->addMenu(trackerMenu);
-  showTrackerListAction = trackerMenu->addAction(tr("Show List"), this, SLOT(OnShowTrackerList()));
+  m_showTrackerListAction = trackerMenu->addAction(tr("Show List"), this, SLOT(OnShowTrackerList()));
   trackerMenu->addSeparator();
-  startTrackerAction = trackerMenu->addAction(tr("Start"), this, SLOT(OnTrackerStart()));
-  stopTrackerAction = trackerMenu->addAction(tr("Stop"), this, SLOT(OnTrackerStop()));
-  cancelTrackerAction = trackerMenu->addAction(tr("Cancel"), this, SLOT(OnTrackerCancel()));
+  m_startTrackerAction = trackerMenu->addAction(tr("Start"), this, SLOT(OnTrackerStart()));
+  m_stopTrackerAction = trackerMenu->addAction(tr("Stop"), this, SLOT(OnTrackerStop()));
+  m_cancelTrackerAction = trackerMenu->addAction(tr("Cancel"), this, SLOT(OnTrackerCancel()));
 
-  stopTrackerAction->setEnabled(false);
-  cancelTrackerAction->setEnabled(false);
+  m_stopTrackerAction->setEnabled(false);
+  m_cancelTrackerAction->setEnabled(false);
 
   QMenu * helpMenu = new QMenu(tr("Help"), this);
   menuBar()->addMenu(helpMenu);
@@ -179,6 +175,7 @@ MainWindow::MainWindow() : m_locationService(CreateDesktopLocationService(*this)
   }
 #endif // NO_DOWNLOADER
 
+  GpsTracker::Instance().SetListener(this);
   m_pDrawWidget->UpdateAfterSettingsChanged();
 }
 
@@ -335,7 +332,7 @@ void MainWindow::CreateNavigationBar()
 
 
     m_runGpxPlayback = pToolBar->addAction(QIcon(":/navig64/play.png"),
-                                           tr("My Position"),
+                                           tr("Run GPX Playback"),
                                            this,
                                            SLOT(OnPlayGpx()));
     m_runGpxPlayback->setCheckable(true);
@@ -468,10 +465,18 @@ void MainWindow::OnAbout()
 
 void MainWindow::OnPlayGpx()
 {
-    static const string gpxPath = "/home/andika/Downloads/2305421.gpx";
-    m_gpxPlayback.reset(new gpx::GpxPlayback(gpxPath, m_pDrawWidget->GetFramework()));
-    m_gpxPlayback->SetOnLocationUpdateCallback(std::bind(&MainWindow::OnLocationUpdated, this, _1));
-    m_gpxPlayback->Play();
+    if (m_runGpxPlayback->isChecked()) {
+        char const * homePath = ::getenv("HOME");
+        string const home(homePath ? homePath : "");
+        QString fileName = QFileDialog::getOpenFileName(this,
+                    tr("Open GPX"), tr(home.c_str()),
+                    tr("GPX Files (*.gpx)"));
+        m_gpxPlayback.reset(new gpx::GpxPlayback(fileName.toStdString()));
+        m_gpxPlayback->SetOnLocationUpdateCallback(std::bind(&MainWindow::OnLocationUpdated, this, _1));
+        m_gpxPlayback->Play();
+    } else {
+        m_gpxPlayback->Stop();
+    }
 }
 
 void MainWindow::OnLocationError(location::TLocationError errorCode)
@@ -493,6 +498,20 @@ void MainWindow::OnLocationError(location::TLocationError errorCode)
 void MainWindow::OnLocationUpdated(location::GpsInfo const & info)
 {
   m_pDrawWidget->GetFramework().OnLocationUpdate(info);
+}
+
+void MainWindow::OnTrackingStarted()
+{
+    m_startTrackerAction->setEnabled(false);
+    m_stopTrackerAction->setEnabled(true);
+    m_cancelTrackerAction->setEnabled(true);
+}
+
+void MainWindow::OnTrackingStopped(bool cancel)
+{
+    m_startTrackerAction->setEnabled(true);
+    m_stopTrackerAction->setEnabled(false);
+    m_cancelTrackerAction->setEnabled(false);
 }
 
 void MainWindow::OnMyPosition()

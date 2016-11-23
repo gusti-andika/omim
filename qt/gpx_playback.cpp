@@ -29,6 +29,7 @@ void GpxPlayback::Play() {
                     threads::Sleep(1000);
                 }
             });
+        m_state = State::PLAYING;
 }
 
 void GpxPlayback::Stop() {
