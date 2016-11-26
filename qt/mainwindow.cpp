@@ -175,7 +175,7 @@ MainWindow::MainWindow() : m_locationService(CreateDesktopLocationService(*this)
   }
 #endif // NO_DOWNLOADER
 
-  GpsTracker::Instance().SetListener(this);
+  m_pDrawWidget->GetFramework().GetGpsTracker().SetListener(this);
   m_pDrawWidget->UpdateAfterSettingsChanged();
 }
 
@@ -646,17 +646,17 @@ void MainWindow::OnShowTrackerList()
 
 void MainWindow::OnTrackerStart()
 {
-    GpsTracker::Instance().Start();
+    m_pDrawWidget->GetFramework().GetGpsTracker().Start();
 }
 
 void MainWindow::OnTrackerStop()
 {
-    GpsTracker::Instance().Stop();
+    m_pDrawWidget->GetFramework().GetGpsTracker().Stop();
 }
 
 void MainWindow::OnTrackerCancel()
 {
-    GpsTracker::Instance().Cancel();
+    m_pDrawWidget->GetFramework().GetGpsTracker().Cancel();
 }
 
 

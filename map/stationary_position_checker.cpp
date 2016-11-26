@@ -6,7 +6,7 @@ int const kStationaryDistance = 15; //stationary position distance threshold in 
 int const kStationaryCheckDuration = 30;
 
 void StationaryPositionChecker::CheckPositionStationary(const location::GpsInfo & info) {
-    LOG(LDEBUG, ("GpsInfo: ", info));
+    //LOG(LDEBUG, ("GpsInfo: ", info));
 
     if (!m_lastInfo) {
         m_lastInfo.reset(new location::GpsInfo(info));
@@ -16,7 +16,7 @@ void StationaryPositionChecker::CheckPositionStationary(const location::GpsInfo 
     double distance = ms::DistanceOnEarth(m_lastInfo->m_latitude, m_lastInfo->m_longitude,
                                           info.m_latitude, info.m_longitude);
     double tstampSpan = info.m_timestamp - m_lastInfo->m_timestamp;
-    LOG(LDEBUG, ("Distance: ", distance, ", TstampSpan:", tstampSpan));
+    //LOG(LDEBUG, ("Distance: ", distance, ", TstampSpan:", tstampSpan));
 
     if (!m_isPause && distance <= kStationaryDistance) {
         if (m_StartTime > 0) {

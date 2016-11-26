@@ -674,7 +674,6 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
 
   case Message::ShowGpsTrackPointsRect:
     {
-      //AddUserEvent(make_unique_dp<SetVisibleViewportEvent>(m_gpsTrackRenderer->GetRect()));
       m2::RectD rect = m_gpsTrackRenderer->GetRect();
       double dx = rect.SizeX() * 0.2;
       double dy = rect.SizeY() * 0.2;

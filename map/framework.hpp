@@ -9,6 +9,7 @@
 #include "map/place_page_info.hpp"
 #include "map/track.hpp"
 #include "map/traffic_manager.hpp"
+#include "map/gps_tracker.hpp"
 
 #include "drape_frontend/gui/skin.hpp"
 #include "drape_frontend/drape_api.hpp"
@@ -171,6 +172,8 @@ protected:
 
   TrafficManager m_trafficManager;
 
+  GpsTracker m_gpsTracker;
+
   /// This function will be called by m_storage when latest local files
   /// is downloaded.
   void OnCountryFileDownloaded(storage::TCountryId const & countryId, storage::Storage::TLocalFilePtr const localFile);
@@ -201,6 +204,8 @@ public:
   df::DrapeApi & GetDrapeApi() { return m_drapeApi; }
 
   uber::Api & GetUberApi() { return m_uberApi;}
+
+  GpsTracker & GetGpsTracker() { return m_gpsTracker;}
 
   /// Migrate to new version of very different data.
   bool IsEnoughSpaceForMigrate() const;

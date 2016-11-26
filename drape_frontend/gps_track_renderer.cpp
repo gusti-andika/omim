@@ -31,15 +31,15 @@ size_t const kAveragePointsCount = 512;
 float const kRadiusInPixel[] =
 {
   // 1   2     3     4     5     6     7     8     9     10
-  0.8f, 0.8f, 0.8f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f,
+  1.3f, 1.3f, 1.3f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f,
   //11   12    13    14    15    16    17    18    19     20
-  2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 3.5f, 4.5f, 4.5f, 4.5f, 5.5f
+  3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 4.0f, 5.0f, 5.0f, 5.0f, 6.0f
 };
 
 double const kHumanSpeed = 2.6; // meters per second
 double const kCarSpeed = 6.2; // meters per second
-uint8_t const kMinDayAlpha = 90;
-uint8_t const kMaxDayAlpha = 144;
+uint8_t const kMinDayAlpha = 144;
+uint8_t const kMaxDayAlpha = 200;
 uint8_t const kMinNightAlpha = 50;
 uint8_t const kMaxNightAlpha = 102;
 double const kUnknownDistanceTime = 5 * 60; // seconds
@@ -125,9 +125,7 @@ void GpsTrackRenderer::UpdatePoints(vector<GpsTrackPoint> const & toAdd, vector<
   {
     m_pointsSpline = m2::Spline(m_points.size());
     for (size_t i = 0; i < m_points.size(); i++) {
-      LOG(LDEBUG, (m2::DebugPrint(m_points[i].m_point)));
       m_rect.Add(m_points[i].m_point);
-      LOG(LDEBUG, (m2::DebugPrint(m_rect)));
       m_pointsSpline.AddPoint(m_points[i].m_point);
     }
   }
@@ -189,7 +187,7 @@ dp::Color GpsTrackRenderer::GetColorBySpeed(double speed) const
   else if (speed > kCarSpeed)
     return df::GetColorConstant(style, df::TrackPlaneSpeed);
 
-  return df::GetColorConstant(style, df::TrackHumanSpeed);
+  return df::GetColorConstant(style, df::Route);
 }
 
 void GpsTrackRenderer::RenderTrack(ScreenBase const & screen, int zoomLevel,

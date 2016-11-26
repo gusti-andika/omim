@@ -50,7 +50,7 @@ BookmarkData const & Bookmark::GetData() const
 
 dp::Anchor Bookmark::GetAnchor() const
 {
-  return dp::Bottom;
+  return dp::Center;
 }
 
 string Bookmark::GetSymbolName() const

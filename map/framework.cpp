@@ -216,10 +216,11 @@ void Framework::OnLocationUpdate(GpsInfo const & info)
 
   MatchLocationToRoute(rInfo, routeMatchingInfo);
 
-  GpsTracker::Instance().OnLocationUpdated(info);
-
   CallDrapeFunction(bind(&df::DrapeEngine::SetGpsInfo, _1, rInfo,
-                         m_routingSession.IsNavigable() || GpsTracker::Instance().IsEnabled(), routeMatchingInfo));
+                         m_routingSession.IsNavigable() || m_gpsTracker.IsEnabled(), routeMatchingInfo));
+
+  m_gpsTracker.OnLocationUpdated(info);
+
   if (IsTrackingReporterEnabled())
     m_trackingReporter.AddLocation(info);
 }
@@ -353,6 +354,7 @@ Framework::Framework()
   , m_storage(platform::migrate::NeedMigrate() ? COUNTRIES_OBSOLETE_FILE : COUNTRIES_FILE)
   , m_bmManager(*this)
   , m_isRenderingEnabled(true)
+  , m_gpsTracker(*this)
   , m_trackingReporter(platform::CreateSocket(), TRACKING_REALTIME_HOST, TRACKING_REALTIME_PORT,
                        tracking::Reporter::kPushDelayMs)
   , m_trafficManager(m_model.GetIndex(), bind(&Framework::GetMwmsByRect, this, _1))
@@ -370,7 +372,7 @@ Framework::Framework()
     mapStyle = kDefaultMapStyle;
   GetStyleReader().SetCurrentStyle(static_cast<MapStyle>(mapStyle));
 
-  m_connectToGpsTrack = GpsTracker::Instance().IsEnabled();
+  m_connectToGpsTrack = m_gpsTracker.IsEnabled();
 
   m_ParsedMapApi.SetBookmarkManager(&m_bmManager);
 
@@ -461,6 +463,7 @@ Framework::~Framework()
 {
   m_trafficManager.SetDrapeEngine(nullptr);
   m_drapeApi.SetEngine(nullptr);
+  m_gpsTracker.SetEngine(nullptr);
   m_drapeEngine.reset();
 
   m_model.SetOnMapDeregisteredCallback(nullptr);
@@ -1678,7 +1681,7 @@ void Framework::CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory,
   }
 
   if (m_connectToGpsTrack)
-    GpsTracker::Instance().Connect(bind(&Framework::OnUpdateGpsTrackPointsCallback, this, _1, _2));
+    m_gpsTracker.Connect(bind(&Framework::OnUpdateGpsTrackPointsCallback, this, _1, _2));
 
   m_drapeEngine->RequestSymbolsSize(kSearchMarks, [this](vector<m2::PointU> const & sizes)
   {
@@ -1687,7 +1690,7 @@ void Framework::CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory,
 
   m_drapeApi.SetEngine(make_ref(m_drapeEngine));
   m_trafficManager.SetDrapeEngine(make_ref(m_drapeEngine));
-  GpsTracker::Instance().SetEngine(make_ref(m_drapeEngine));
+  m_gpsTracker.SetEngine(make_ref(m_drapeEngine));
 }
 
 void Framework::UpdateDrapeEngine(int width, int height)
@@ -1713,7 +1716,7 @@ ref_ptr<df::DrapeEngine> Framework::GetDrapeEngine()
 
 void Framework::DestroyDrapeEngine()
 {
-  GpsTracker::Instance().Disconnect();
+  m_gpsTracker.Disconnect();
   m_drapeEngine.reset();
 }
 
@@ -1736,13 +1739,13 @@ void Framework::ConnectToGpsTracker()
   if (m_drapeEngine)
   {
     m_drapeEngine->ClearGpsTrackPoints();
-    GpsTracker::Instance().Connect(bind(&Framework::OnUpdateGpsTrackPointsCallback, this, _1, _2));
+    m_gpsTracker.Connect(bind(&Framework::OnUpdateGpsTrackPointsCallback, this, _1, _2));
   }
 }
 
 void Framework::DisconnectFromGpsTracker()
 {
-  GpsTracker::Instance().Disconnect();
+  m_gpsTracker.Disconnect();
   if (m_drapeEngine)
     m_drapeEngine->ClearGpsTrackPoints();
 }
