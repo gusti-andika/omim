@@ -215,6 +215,7 @@ void GpsTracker::ClearMarks()
 {
     Guard guard(*this);
     guard.m_controller.Clear();
+    m_engine->ClearGpsTrackPoints();
 }
 
 

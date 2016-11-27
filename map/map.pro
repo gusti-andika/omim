@@ -31,7 +31,9 @@ HEADERS += \
     traffic_manager.hpp \
     user_mark.hpp \
     user_mark_container.hpp \
-    stationary_position_checker.hpp
+    stationary_position_checker.hpp \
+    gpx_parser.hpp \
+    gpx_playback.hpp
 
 SOURCES += \
     ../api/src/c/api-client.c \
@@ -56,7 +58,9 @@ SOURCES += \
     traffic_manager.cpp \
     user_mark.cpp \
     user_mark_container.cpp \
-    stationary_position_checker.cpp
+    stationary_position_checker.cpp \
+    gpx_parser.cpp \
+    gpx_playback.cpp
 
 !iphone*:!tizen*:!android* {
   QT += opengl

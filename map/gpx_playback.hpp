@@ -1,7 +1,7 @@
 #pragma once
 
 #include "map/framework.hpp"
-#include "gpx_parser.hpp"
+#include "map/gpx_parser.hpp"
 #include "std/thread.hpp"
 #include "base/timer.hpp"
 

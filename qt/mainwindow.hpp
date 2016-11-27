@@ -15,7 +15,7 @@
   #include <QtWidgets/QMainWindow>
 #endif
 
-#include "qt/gpx_playback.hpp"
+#include "map/gpx_playback.hpp"
 
 class QDockWidget;
 class QPushButton;
