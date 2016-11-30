@@ -166,10 +166,11 @@ void GpsTracker::Stop()
 
     SetEndPointMark(m_lastPoint);
 
-    m_engine->LoseLocation();
+    //m_engine->LoseLocation();
     m_engine->ShowGpsTrackPointsRect();
 
     m_started = false;
+    m_hasStartPoint = false;
     if (m_listener)
         m_listener->OnTrackingStopped();
 }
@@ -188,6 +189,7 @@ void GpsTracker::Cancel()
     if (m_listener)
         m_listener->OnTrackingStopped(true);
     m_started = false;
+    m_hasStartPoint = false;
 }
 
 bool GpsTracker::IsStarted()
