@@ -11,6 +11,7 @@ namespace gpx {
     const string GPX_SPEED = "speed";
     const string GPX_TRKSEG = "trkseg";
     const string GPX_TRKPT = "trkpt";
+    const string GPX_COURSE = "course";
 
     GpxParser::GpxParser(Gpx & gpx):m_gpx(gpx) {
 
@@ -55,12 +56,12 @@ namespace gpx {
         if (prevTag == GPX_TRKPT) {
             if (curTag == GPX_TIME) {
                 _temp.m_timestamp = my::StringToTimestamp(data);
-
             } else if (curTag == GPX_ELE) {
                 strings::to_double(data, _temp.m_altitude);
-
             } else if (curTag == GPX_SPEED) {
                 strings::to_double(data, _temp.m_speed);
+            } else if (curTag == GPX_COURSE) {
+                strings::to_double(data, _temp.m_bearing);
             }
         }
 
