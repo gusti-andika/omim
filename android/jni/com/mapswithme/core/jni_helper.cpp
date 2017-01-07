@@ -21,6 +21,7 @@ jclass g_httpClientClazz;
 jclass g_httpParamsClazz;
 jclass g_platformSocketClazz;
 jclass g_utilsClazz;
+jclass g_trackerInfoClazz;
 
 extern "C"
 {
@@ -39,7 +40,7 @@ JNI_OnLoad(JavaVM * jvm, void *)
   g_httpParamsClazz = jni::GetGlobalClassRef(env, "com/mapswithme/util/HttpClient$Params");
   g_platformSocketClazz = jni::GetGlobalClassRef(env, "com/mapswithme/maps/location/PlatformSocket");
   g_utilsClazz = jni::GetGlobalClassRef(env, "com/mapswithme/util/Utils");
-
+  g_trackerInfoClazz = jni::GetGlobalClassRef(env, "com/mapswithme/maps/tracker/TrackerController$TrackerInfo");;
   return JNI_VERSION_1_6;
 }
 
@@ -55,6 +56,7 @@ JNI_OnUnload(JavaVM *, void *)
   env->DeleteGlobalRef(g_httpParamsClazz);
   env->DeleteGlobalRef(g_platformSocketClazz);
   env->DeleteGlobalRef(g_utilsClazz);
+  env->DeleteGlobalRef(g_trackerInfoClazz);
 }
 } // extern "C"
 
@@ -89,6 +91,13 @@ jmethodID GetStaticMethodID(JNIEnv * env, jclass clazz, char const * name, char 
 {
   jmethodID mid = env->GetStaticMethodID(clazz, name, signature);
   ASSERT(mid, ("Can't get static method ID", name, signature, DescribeException()));
+  return mid;
+}
+
+jfieldID GetStaticFieldID(JNIEnv * env, jclass clazz, char const * name, char const * signature)
+{
+  jfieldID mid = env->GetStaticFieldID(clazz, name, signature);
+  ASSERT(mid, ("Can't get static field ID", name, signature, DescribeException()));
   return mid;
 }
 

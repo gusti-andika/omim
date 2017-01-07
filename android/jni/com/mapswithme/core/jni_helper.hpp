@@ -16,6 +16,7 @@ extern jclass g_httpClientClazz;
 extern jclass g_httpParamsClazz;
 extern jclass g_platformSocketClazz;
 extern jclass g_utilsClazz;
+extern jclass g_trackerInfoClazz;
 
 namespace jni
 {
@@ -24,6 +25,7 @@ JavaVM * GetJVM();
 
 jmethodID GetMethodID(JNIEnv * env, jobject obj, char const * name, char const * signature);
 jmethodID GetStaticMethodID(JNIEnv * env, jclass clazz, char const * name, char const * signature);
+jfieldID GetStaticFieldID(JNIEnv * env, jclass clazz, char const * name, char const * signature);
 jmethodID GetConstructorID(JNIEnv * env, jclass clazz, char const * signature);
 
 // Result value should be DeleteGlobalRef`ed by caller
