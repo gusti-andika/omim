@@ -36,17 +36,18 @@ public:
   struct Params : BaseRenderer::Params
   {
     Params(ref_ptr<ThreadsCommutator> commutator, ref_ptr<dp::OGLContextFactory> factory,
-           ref_ptr<dp::TextureManager> texMng, MapDataProvider const & model,
+           ref_ptr<dp::TextureManager> texMng,
+           ref_ptr<ReadManager> readMng,
            TUpdateCurrentCountryFn const & updateCurrentCountryFn,
            ref_ptr<RequestedTiles> requestedTiles, bool allow3dBuildings)
       : BaseRenderer::Params(commutator, factory, texMng)
-      , m_model(model)
+      , m_readManager(readMng)
       , m_updateCurrentCountryFn(updateCurrentCountryFn)
       , m_requestedTiles(requestedTiles)
       , m_allow3dBuildings(allow3dBuildings)
     {}
 
-    MapDataProvider const & m_model;
+    ref_ptr<ReadManager> m_readManager;
     TUpdateCurrentCountryFn m_updateCurrentCountryFn;
     ref_ptr<RequestedTiles> m_requestedTiles;
     bool m_allow3dBuildings;
@@ -94,9 +95,8 @@ private:
 
   void CleanupOverlays(TileKey const & tileKey);
 
-  MapDataProvider m_model;
   drape_ptr<BatchersPool<TileKey, TileKeyStrictComparator>> m_batchersPool;
-  drape_ptr<ReadManager> m_readManager;
+  ref_ptr<ReadManager> m_readManager;
   drape_ptr<RouteBuilder> m_routeBuilder;
   drape_ptr<TrafficGenerator> m_trafficGenerator;
   drape_ptr<DrapeApiBuilder> m_drapeApiBuilder;

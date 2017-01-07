@@ -13,6 +13,7 @@ class InterpolationHolder
 public:
   static InterpolationHolder & Instance();
   bool Advance(double elapsedSeconds);
+  bool HasInterpolator();
 
 private:
   InterpolationHolder() = default;

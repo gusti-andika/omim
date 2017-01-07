@@ -54,6 +54,7 @@ class SelectionShape;
 class Framebuffer;
 class TransparentLayer;
 class SelectObjectMessage;
+class ReadManager;
 
 struct TapInfo
 {
@@ -77,6 +78,7 @@ public:
     Params(ref_ptr<ThreadsCommutator> commutator,
            ref_ptr<dp::OGLContextFactory> factory,
            ref_ptr<dp::TextureManager> texMng,
+           ref_ptr<ReadManager> readMng,
            Viewport viewport,
            TModelViewChanged const & modelViewChangedFn,
            TTapEventInfoFn const & tapEventFn,
@@ -91,6 +93,7 @@ public:
            bool isRoutingActive,
            bool isAutozoomEnabled)
       : BaseRenderer::Params(commutator, factory, texMng)
+      , m_readManager(readMng)
       , m_viewport(viewport)
       , m_modelViewChangedFn(modelViewChangedFn)
       , m_tapEventFn(tapEventFn)
@@ -105,7 +108,7 @@ public:
       , m_isRoutingActive(isRoutingActive)
       , m_isAutozoomEnabled(isAutozoomEnabled)
     {}
-
+    ref_ptr<ReadManager> m_readManager;
     Viewport m_viewport;
     TModelViewChanged m_modelViewChangedFn;
     TTapEventInfoFn m_tapEventFn;
@@ -151,6 +154,7 @@ public:
   void ChangeModelView(double autoScale, m2::PointD const & userPos, double azimuth, m2::PointD const & pxZero,
                        TAnimationCreator const & parallelAnimCreator) override;
 
+  Viewport const & GetViewport() { return m_viewport; }
 protected:
   void AcceptMessage(ref_ptr<Message> message) override;
   unique_ptr<threads::IRoutine> CreateRoutine() override;
@@ -288,6 +292,7 @@ private:
   drape_ptr<DrapeApiRenderer> m_drapeApiRenderer;
 
   drape_ptr<dp::OverlayTree> m_overlayTree;
+  ref_ptr<ReadManager> m_readManager;
 
   dp::UniformValuesStorage m_generalUniforms;
 

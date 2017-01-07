@@ -360,6 +360,10 @@ void MyPositionController::NextMode(ScreenBase const & screen)
 void MyPositionController::OnLocationUpdate(location::GpsInfo const & info, bool isNavigable,
                                             ScreenBase const & screen)
 {
+  //from mode == NotFollowNoPosition to next mode, will be triggered from user action
+  if (m_mode == location::NotFollowNoPosition)
+      return;
+
   m2::PointD const oldPos = GetDrawablePosition();
   double const oldAzimut = GetDrawableAzimut();
 
@@ -417,7 +421,7 @@ void MyPositionController::OnLocationUpdate(location::GpsInfo const & info, bool
                         m_isInRouting ? GetRoutingRotationPixelCenter() : m_visiblePixelRect.Center(), kDoNotChangeZoom);
     }
   }
-  else if (m_mode == location::PendingPosition || m_mode == location::NotFollowNoPosition)
+  else if (m_mode == location::PendingPosition /*|| m_mode == location::NotFollowNoPosition*/)
   {
     if (m_isInRouting)
     {

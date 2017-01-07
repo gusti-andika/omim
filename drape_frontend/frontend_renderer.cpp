@@ -10,10 +10,12 @@
 #include "drape_frontend/visual_params.hpp"
 #include "drape_frontend/user_mark_shapes.hpp"
 #include "drape_frontend/batch_merge_helper.hpp"
+#include "drape_frontend/read_manager.hpp"
 
 #include "drape/debug_rect_renderer.hpp"
 #include "drape/shader_def.hpp"
 #include "drape/support_manager.hpp"
+#include "drape/screen_capturer.hpp"
 
 #include "drape/utils/glyph_usage_tracker.hpp"
 #include "drape/utils/gpu_mem_tracker.hpp"
@@ -34,6 +36,13 @@
 #include "std/bind.hpp"
 #include "std/cmath.hpp"
 
+#include "lodepng.hpp"
+#include "coding/file_writer.hpp"
+#include "coding/file_name_utils.hpp"
+#include "platform/platform.hpp"
+
+using dp::ScreenCapturer;
+
 namespace df
 {
 
@@ -42,6 +51,16 @@ namespace
 constexpr float kIsometryAngle = math::pi * 76.0f / 180.0f;
 const double VSyncInterval = 0.06;
 //const double VSyncInterval = 0.014;
+
+//ScreenCapture class file save callback
+auto const mapSaverFn = [](string const& filename, uint32_t w, uint32_t h,
+            vector<unsigned char> const &raw){
+    vector<unsigned char> png;
+    LodePNG::encode(png, raw, w, h);
+    WriterPtr<Writer> wptr(new FileWriter(filename));
+    LodePNG::saveFile(png, wptr);
+    LOG(LDEBUG, ("Request capture map completed: ", filename));
+};
 
 struct MergedGroupKey
 {
@@ -120,6 +139,7 @@ FrontendRenderer::FrontendRenderer(Params const & params)
   , m_gpsTrackRenderer(new GpsTrackRenderer(bind(&FrontendRenderer::PrepareGpsTrackPoints, this, _1)))
   , m_drapeApiRenderer(new DrapeApiRenderer())
   , m_overlayTree(new dp::OverlayTree())
+  , m_readManager(params.m_readManager)
   , m_enablePerspectiveInNavigation(false)
   , m_enable3dBuildings(params.m_allow3dBuildings)
   , m_isIsometry(false)
@@ -658,10 +678,25 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       break;
     }
 
+  case Message::CaptureMapPNG:
+  {
+      ref_ptr<CaptureMapPNGMessage> msg = message;
+      m2::RectU32 rect(m_viewport.GetX0(), m_viewport.GetY0(),
+                       m_viewport.GetWidth(), m_viewport.GetHeight());
+
+      ScreenCapturer & capturer = ScreenCapturer::Instance();
+      capturer.StartCapture(msg->GetFileName(), rect);
+      capturer.Capture(mapSaverFn);
+      capturer.EndCapture();
+      break;
+  }
   case Message::UpdateGpsTrackPoints:
     {
       ref_ptr<UpdateGpsTrackPointsMessage> msg = message;
-      m_gpsTrackRenderer->UpdatePoints(msg->GetPointsToAdd(), msg->GetPointsToRemove());
+      if (msg->IsPaused())
+        m_gpsTrackRenderer->Pause();
+      else
+        m_gpsTrackRenderer->UpdatePoints(msg->GetPointsToAdd(), msg->GetPointsToRemove());
       break;
     }
 
@@ -674,15 +709,17 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
 
   case Message::ShowGpsTrackPointsRect:
     {
+      ref_ptr<ShowGpsTrackPointsRectMessage> msg = message;
       m2::RectD rect = m_gpsTrackRenderer->GetRect();
-      double dx = rect.SizeX() * 0.2;
-      double dy = rect.SizeY() * 0.2;
+      double dx = rect.SizeX() * 0.25;
+      double dy = rect.SizeY() * 0.25;
 
       m2::RectD rect2 = rect;
       rect2.SetSizes(rect.SizeX() + dx, rect.SizeY() + dy);
 
-      AddUserEvent(make_unique_dp<SetRectEvent>(rect2, false,
-                                                -1, true));
+      drape_ptr<SetRectEvent> event = make_unique_dp<SetRectEvent>(rect2, false,
+                                                                   -1, true);
+      AddUserEvent(move(event));
       break;
     }
 
@@ -1722,7 +1759,8 @@ void FrontendRenderer::Routine::Do()
     if (modelViewChanged)
       m_renderer.UpdateScene(modelView);
 
-    isActiveFrame |= InterpolationHolder::Instance().Advance(frameTime);
+    bool hasInterpolation = InterpolationHolder::Instance().Advance(frameTime);
+    isActiveFrame |= hasInterpolation;
     AnimationSystem::Instance().Advance(frameTime);
 
     isActiveFrame |= m_renderer.m_userEventStream.IsWaitingForActionCompletion();
@@ -1756,6 +1794,7 @@ void FrontendRenderer::Routine::Do()
     }
 
     context->present();
+
     frameTime = timer.ElapsedSeconds();
     timer.Reset();
 

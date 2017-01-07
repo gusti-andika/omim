@@ -29,6 +29,7 @@ namespace df
 
 class UserMarksProvider;
 class MapDataProvider;
+class ReadManager;
 class Viewport;
 
 class DrapeEngine
@@ -144,7 +145,9 @@ public:
   void Allow3dMode(bool allowPerspectiveInNavigation, bool allow3dBuildings);
   void EnablePerspective();
 
+  //TODO: remove this once AddGpsTrackPoint work
   void UpdateGpsTrackPoints(vector<df::GpsTrackPoint> && toAdd, vector<uint32_t> && toRemove);
+  void PauseGpsTrackPoints();
   void ClearGpsTrackPoints();
   void ShowGpsTrackPointsRect();
 
@@ -168,7 +171,7 @@ public:
   void ClearTrafficCache(MwmSet::MwmId const & mwmId);
 
   void SetFontScaleFactor(double scaleFactor);
-
+  void CaptureMapPNG(string const& filename);
 private:
   void AddUserEvent(drape_ptr<UserEvent> && e);
   void ModelViewChanged(ScreenBase const & screen);
@@ -187,8 +190,9 @@ private:
   drape_ptr<ThreadsCommutator> m_threadCommutator;
   drape_ptr<dp::TextureManager> m_textureManager;
   drape_ptr<RequestedTiles> m_requestedTiles;
-
+  drape_ptr<ReadManager> m_readManager;
   Viewport m_viewport;
+  MapDataProvider m_mapDataProvider;
 
   TModelViewListenerFn m_modelViewChanged;
   location::TMyPositionModeChanged m_myPositionModeChanged;

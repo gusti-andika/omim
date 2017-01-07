@@ -12,6 +12,7 @@
 
 #include "std/map.hpp"
 #include "std/vector.hpp"
+#include "std/set.hpp"
 
 namespace df
 {
@@ -28,11 +29,14 @@ public:
   void UpdatePoints(vector<GpsTrackPoint> const & toAdd,
                     vector<uint32_t> const & toRemove);
 
+  void AddPoint(GpsTrackPoint const & point);
+
   void RenderTrack(ScreenBase const & screen, int zoomLevel,
                    ref_ptr<dp::GpuProgramManager> mng,
                    dp::UniformValuesStorage const & commonUniforms);
 
   void Update();
+  void Pause();
   void Clear();
   void ClearRenderData();
 
@@ -47,6 +51,7 @@ private:
   TRenderDataRequestFn m_dataRequestFn;
   vector<drape_ptr<GpsTrackRenderData>> m_renderData;
   vector<GpsTrackPoint> m_points;
+  set<int> m_pausedPoints;
   m2::Spline m_pointsSpline;
   bool m_needUpdate;
   bool m_waitForRenderData;

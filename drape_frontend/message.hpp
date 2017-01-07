@@ -74,6 +74,7 @@ public:
     DrapeApiAddLines,
     DrapeApiRemove,
     DrapeApiFlush,
+    CaptureMapPNG
   };
 
   virtual ~Message() {}

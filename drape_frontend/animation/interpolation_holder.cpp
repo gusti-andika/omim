@@ -31,6 +31,11 @@ bool InterpolationHolder::Advance(double elapsedSeconds)
   return hasAnimations;
 }
 
+bool InterpolationHolder::HasInterpolator()
+{
+    return !m_interpolations.empty();
+}
+
 InterpolationHolder::~InterpolationHolder()
 {
   ASSERT(m_interpolations.empty(), ());

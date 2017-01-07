@@ -8,6 +8,7 @@ include($$ROOT_DIR/common.pri)
 INCLUDEPATH *= $$ROOT_DIR/3party/protobuf/src
 INCLUDEPATH *= $$ROOT_DIR/3party/expat/lib
 INCLUDEPATH *= $$ROOT_DIR/3party/freetype/include
+INCLUDEPATH *= $$ROOT_DIR/3party/lodepng
 #DEFINES += DRAW_INFO
 
 SOURCES += \
@@ -105,7 +106,7 @@ SOURCES += \
     watch/glyph_cache_impl.cpp \
     watch/geometry_processors.cpp \
     watch/feature_processor.cpp \
-    watch/default_font.cpp \
+    watch/default_font.cpp
 
 HEADERS += \
     animation/animation.hpp \
@@ -219,4 +220,4 @@ HEADERS += \
     watch/icon_info.hpp \
     watch/brush_info.hpp \
     watch/geometry_processors.hpp \
-    watch/feature_processor.hpp \
+    watch/feature_processor.hpp

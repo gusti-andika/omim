@@ -916,19 +916,26 @@ private:
 class UpdateGpsTrackPointsMessage : public Message
 {
 public:
-  UpdateGpsTrackPointsMessage(vector<GpsTrackPoint> && toAdd, vector<uint32_t> && toRemove)
+  UpdateGpsTrackPointsMessage(vector<GpsTrackPoint> && toAdd, vector<uint32_t> && toRemove, bool isPaused = false)
     : m_pointsToAdd(move(toAdd))
     , m_pointsToRemove(move(toRemove))
+    , m_paused(isPaused)
+  {}
+
+  UpdateGpsTrackPointsMessage(bool paused)
+    : m_paused(paused)
   {}
 
   Type GetType() const override { return Message::UpdateGpsTrackPoints; }
 
   vector<GpsTrackPoint> const & GetPointsToAdd() { return m_pointsToAdd; }
   vector<uint32_t> const & GetPointsToRemove() { return m_pointsToRemove; }
+  bool IsPaused() { return m_paused; }
 
 private:
   vector<GpsTrackPoint> m_pointsToAdd;
   vector<uint32_t> m_pointsToRemove;
+  bool m_paused;
 };
 
 class ClearGpsTrackPointsMessage : public Message
@@ -946,7 +953,6 @@ public:
   ShowGpsTrackPointsRectMessage() = default;
 
   Type GetType() const override { return Message::ShowGpsTrackPointsRect; }
-
 };
 
 class SetTimeInBackgroundMessage : public Message
@@ -1131,6 +1137,19 @@ public:
 
 private:
   TProperties m_properties;
+};
+
+class CaptureMapPNGMessage : public Message
+{
+public:
+    explicit CaptureMapPNGMessage(string const&& filename)
+        : m_fileName(move(filename))
+    {}
+
+    Type GetType() const override { return Message::CaptureMapPNG; }
+    string const& GetFileName() const { return m_fileName; }
+private:
+    string m_fileName;
 };
 
 } // namespace df

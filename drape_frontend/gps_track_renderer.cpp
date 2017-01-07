@@ -99,9 +99,24 @@ void GpsTrackRenderer::ClearRenderData()
   m_needUpdate = true;
 }
 
+void GpsTrackRenderer::AddPoint(const GpsTrackPoint &point)
+{
+    m_points.push_back(move(point));
+    m_rect.Add(m_points.back().m_point);
+    m_pointsSpline.AddPoint(m_points.back().m_point);
+}
+
+void GpsTrackRenderer::Pause()
+{
+    if (m_points.empty())
+        return;
+
+    m_pausedPoints.insert(m_points.size() - 1);
+}
+
 void GpsTrackRenderer::UpdatePoints(vector<GpsTrackPoint> const & toAdd, vector<uint32_t> const & toRemove)
 {
-  bool wasChanged = false;
+  /*bool wasChanged = false;
   if (!toRemove.empty())
   {
     auto removePredicate = [&toRemove](GpsTrackPoint const & pt)
@@ -128,7 +143,11 @@ void GpsTrackRenderer::UpdatePoints(vector<GpsTrackPoint> const & toAdd, vector<
       m_rect.Add(m_points[i].m_point);
       m_pointsSpline.AddPoint(m_points[i].m_point);
     }
-  }
+  }*/
+  if (toAdd.empty())
+      return;
+
+  AddPoint(toAdd.front());
 
   m_needUpdate = true;
 }
@@ -148,6 +167,9 @@ dp::Color GpsTrackRenderer::CalculatePointColor(size_t pointIndex, m2::PointD co
   ASSERT_LESS(pointIndex, m_points.size(), ());
   if (pointIndex + 1 == m_points.size())
     return dp::Color::Transparent();
+
+  if (m_pausedPoints.find(pointIndex) != m_pausedPoints.end())
+      return dp::Color::Transparent();
 
   GpsTrackPoint const & start = m_points[pointIndex];
   GpsTrackPoint const & end = m_points[pointIndex + 1];

@@ -1,7 +1,7 @@
 #include "drape_frontend/drape_engine.hpp"
 #include "drape_frontend/message_subclasses.hpp"
 #include "drape_frontend/visual_params.hpp"
-
+#include "drape_frontend/read_manager.hpp"
 #include "drape_frontend/gui/drape_gui.hpp"
 
 #include "storage/index.hpp"
@@ -21,6 +21,7 @@ namespace df
 {
 DrapeEngine::DrapeEngine(Params && params)
   : m_viewport(params.m_viewport)
+  , m_mapDataProvider(params.m_model)
 {
   VisualParams::Init(params.m_vs, df::CalculateTileSize(m_viewport.GetWidth(), m_viewport.GetHeight()));
 
@@ -55,8 +56,11 @@ DrapeEngine::DrapeEngine(Params && params)
   if (settings::Get("LastEnterBackground", lastEnterBackground))
     timeInBackground = my::Timer::LocalTime() - lastEnterBackground;
 
-  FrontendRenderer::Params frParams(make_ref(m_threadCommutator), params.m_factory,
-                                    make_ref(m_textureManager), m_viewport,
+  auto commutator = make_ref<ThreadsCommutator>(m_threadCommutator);
+  m_readManager = make_unique_dp<ReadManager>(commutator, m_mapDataProvider, params.m_allow3dBuildings);
+
+  FrontendRenderer::Params frParams(commutator, params.m_factory,
+                                    make_ref(m_textureManager), make_ref(m_readManager), m_viewport,
                                     bind(&DrapeEngine::ModelViewChanged, this, _1),
                                     bind(&DrapeEngine::TapEvent, this, _1),
                                     bind(&DrapeEngine::UserPositionChanged, this, _1),
@@ -69,8 +73,8 @@ DrapeEngine::DrapeEngine(Params && params)
   m_frontend = make_unique_dp<FrontendRenderer>(frParams);
 
   BackendRenderer::Params brParams(frParams.m_commutator, frParams.m_oglContextFactory,
-                                   frParams.m_texMng, params.m_model,
-                                   params.m_model.UpdateCurrentCountryFn(),
+                                   frParams.m_texMng, frParams.m_readManager,
+                                   m_mapDataProvider.UpdateCurrentCountryFn(),
                                    make_ref(m_requestedTiles), params.m_allow3dBuildings);
   m_backend = make_unique_dp<BackendRenderer>(brParams);
 
@@ -463,6 +467,14 @@ void DrapeEngine::UpdateGpsTrackPoints(vector<df::GpsTrackPoint> && toAdd, vecto
                                   MessagePriority::Normal);
 }
 
+void DrapeEngine::PauseGpsTrackPoints()
+{
+  m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
+                                  make_unique_dp<UpdateGpsTrackPointsMessage>(true),
+                                  MessagePriority::Normal);
+}
+
+
 void DrapeEngine::ClearGpsTrackPoints()
 {
   m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
@@ -576,6 +588,14 @@ void DrapeEngine::SetFontScaleFactor(double scaleFactor)
 
   settings::Set(kFontScale, scaleFactor);
   VisualParams::Instance().SetFontScale(scaleFactor);
+}
+
+void DrapeEngine::CaptureMapPNG(string const &filename)
+{
+    LOG(LDEBUG, ("Request capture map to file ", filename));
+    m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
+                                    make_unique_dp<CaptureMapPNGMessage>(move(filename)),
+                                    MessagePriority::Normal);
 }
 
 } // namespace df
