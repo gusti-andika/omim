@@ -53,6 +53,7 @@ FileData::FileData(string const & fileName, Op op)
 #endif
 
   // if we're here - something bad is happened
+  LOG(LERROR, ("Error open/create file", GetErrorProlog()));
   if (m_Op != OP_READ)
     MYTHROW(Writer::OpenException, (GetErrorProlog()));
   else
