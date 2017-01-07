@@ -50,6 +50,7 @@ SOURCES += \
     $$DRAPE_DIR/utils/projection.cpp \
     $$DRAPE_DIR/utils/vertex_decl.cpp \
     $$DRAPE_DIR/vertex_array_buffer.cpp \
+    $$DRAPE_DIR/screen_capturer.cpp
 
 HEADERS += \
     $$ROOT_DIR/3party/sdf_image/sdf_image.h \
@@ -109,6 +110,7 @@ HEADERS += \
     $$DRAPE_DIR/utils/vertex_decl.hpp \
     $$DRAPE_DIR/vertex_array_buffer.hpp \
     $$DRAPE_DIR/visual_scale.hpp \
+    $$DRAPE_DIR/screen_capturer.hpp
 
 iphone*{
     HEADERS += $$DRAPE_DIR/hw_texture_ios.hpp

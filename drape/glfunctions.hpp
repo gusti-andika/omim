@@ -27,6 +27,7 @@ public:
   static void glScissor(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
   static void glFlush();
   static void glFinish();
+  static void glReadPixels(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t colorFormat, uint32_t type, void* data);
 
   static void glFrontFace(glConst mode);
   static void glCullFace(glConst face);

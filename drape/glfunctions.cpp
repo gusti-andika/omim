@@ -102,12 +102,14 @@ typedef void (DP_APIENTRY *TglDeleteFramebuffersFn)(GLsizei n, GLuint const * fr
 typedef void (DP_APIENTRY *TglBindFramebufferFn)(GLenum target, GLuint id);
 typedef void (DP_APIENTRY *TglFramebufferTexture2DFn)(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 typedef GLenum(DP_APIENTRY *TglCheckFramebufferStatusFn)(GLenum target);
+typedef void (DP_APIENTRY *TglReadPixelsFn)( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels );
 
 TglClearColorFn glClearColorFn = nullptr;
 TglClearFn glClearFn = nullptr;
 TglViewportFn glViewportFn = nullptr;
 TglScissorFn glScissorFn = nullptr;
 TglFlushFn glFlushFn = nullptr;
+TglReadPixelsFn glReadPixelsFn = nullptr;
 
 TglActiveTextureFn glActiveTextureFn = nullptr;
 TglBlendEquationFn glBlendEquationFn = nullptr;
@@ -420,6 +422,7 @@ void GLFunctions::Init()
   glViewportFn = &::glViewport;
   glScissorFn = &::glScissor;
   glFlushFn = &::glFlush;
+  glReadPixelsFn = &::glReadPixels;
 
   glActiveTextureFn = LOAD_GL_FUNC(TglActiveTextureFn, glActiveTexture);
   glBlendEquationFn = LOAD_GL_FUNC(TglBlendEquationFn, glBlendEquation);
@@ -520,6 +523,12 @@ void GLFunctions::glClear()
 {
   ASSERT(glClearFn != nullptr, ());
   GLCHECK(glClearFn(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+}
+
+void GLFunctions::glReadPixels(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t colorFormat, uint32_t type, void* data)
+{
+    ASSERT(glReadPixelsFn != nullptr, ());
+    GLCHECK(glReadPixelsFn(x, y, w, h, colorFormat, type, data));
 }
 
 void GLFunctions::glClearDepth()
