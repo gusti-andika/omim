@@ -43,7 +43,7 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../
 LOCAL_MODULE := mapswithme
 LOCAL_STATIC_LIBRARIES := $(prebuild_static_libs)
 
-LOCAL_CFLAGS := -ffunction-sections -fdata-sections -Wno-extern-c-compat
+LOCAL_CFLAGS := -ffunction-sections -fdata-sections -Wno-extern-c-compat -g
 
 ifneq ($(NDK_DEBUG),1)
   ifeq ($(PRODUCTION),1)
@@ -96,6 +96,7 @@ LOCAL_SRC_FILES := \
 	com/mapswithme/maps/uber/Uber.cpp \
 	com/mapswithme/maps/TrackRecorder.cpp \
 	com/mapswithme/maps/UserMarkHelper.cpp \
+	com/mapswithme/maps/GpsTracker.cpp \
 	com/mapswithme/opengl/android_gl_utils.cpp \
 	com/mapswithme/opengl/androidoglcontext.cpp \
 	com/mapswithme/opengl/androidoglcontextfactory.cpp \

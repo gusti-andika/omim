@@ -29,6 +29,7 @@ import com.mapswithme.maps.api.ParsedMwmRequest;
 import com.mapswithme.maps.api.ParsedRoutingData;
 import com.mapswithme.maps.api.ParsedUrlMwmRequest;
 import com.mapswithme.maps.api.RoutePoint;
+import com.mapswithme.maps.tracker.TrackerController;
 import com.mapswithme.maps.uber.Uber;
 import com.mapswithme.maps.uber.UberInfo;
 import com.mapswithme.maps.base.BaseMwmFragmentActivity;
@@ -124,7 +125,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Nullable
   private NavigationController mNavigationController;
 
-  private MainMenu mMainMenu;
+  private TrackerController mTrackerController;
+
+  //private MainMenu mMainMenu;
 
   private PanelAnimator mPanelAnimator;
   private OnmapDownloader mOnmapDownloader;
@@ -135,7 +138,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private View mNavZoomOut;
   private MyPositionButton mNavMyPosition;
 
-  private View mPositionChooser;
+  //private View mPositionChooser;
 
   private boolean mIsFragmentContainer;
   private boolean mIsFullscreen;
@@ -332,7 +335,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       SearchActivity.start(this, query);
   }
 
-  public void showEditor()
+  /*public void showEditor()
   {
     // TODO(yunikkk) think about refactoring. It probably should be called in editor.
     Editor.nativeStartEdit();
@@ -360,7 +363,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
         .setCancelable(true)
         .setPositiveButton(android.R.string.ok, null)
         .show();
-  }
+  }*/
 
   @Override
   public void showDownloader(boolean openDownloaded)
@@ -406,12 +409,13 @@ public class MwmActivity extends BaseMwmFragmentActivity
     if (!mIsFragmentContainer && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP))
       getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-    setContentView(R.layout.activity_map);
+    setContentView(R.layout.activity_map2);
     initViews();
 
     Statistics.INSTANCE.trackConnectionState();
 
-    Framework.nativeSetMapObjectListener(this);
+    //bandidash
+    //Framework.nativeSetMapObjectListener(this);
 
     mSearchController = new FloatingSearchToolbarController(this);
     processIntent(getIntent());
@@ -442,11 +446,14 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
 
     mNavigationController = new NavigationController(this);
+    mTrackerController = new TrackerController(this,
+            findViewById(R.id.top_menu), findViewById(R.id.tracker_frame));
     initMainMenu();
     initOnmapDownloader();
-    initPositionChooser();
+    //initPositionChooser();
   }
 
+  /*
   private void initPositionChooser()
   {
     mPositionChooser = findViewById(R.id.position_chooser);
@@ -492,6 +499,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
     Framework.nativeTurnOffChoosePositionMode();
     setFullscreen(false);
   }
+  */
+
 
   private void initMap()
   {
@@ -559,9 +568,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
     AlohaHelper.logClick(alohaStatEvent);
 
     mFadeView.fadeOut();
-    mMainMenu.close(true, procAfterClose);
+    //mMainMenu.close(true, procAfterClose);
   }
 
+  /*
   private boolean closePositionChooser()
   {
     if (UiUtils.isVisible(mPositionChooser))
@@ -571,7 +581,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
 
     return false;
-  }
+  }*/
 
   public void startLocationToPoint(String statisticsEvent, String alohaEvent, final @Nullable MapObject endPoint)
   {
@@ -604,6 +614,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private void initMainMenu()
   {
+    /*
     mMainMenu = new MainMenu(findViewById(R.id.menu_frame), new BaseMenu.ItemClickListener<MainMenu.Item>()
     {
       @Override
@@ -705,6 +716,51 @@ public class MwmActivity extends BaseMwmFragmentActivity
             }
           });
           break;
+          case START_GPX:
+            closeMenu(Statistics.EventName.MENU_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable() {
+              public void run() {
+                GpsTracker.startGpxPlayback("/mnt/sdcard/20161120.gpx");
+              }
+            });
+
+            break;
+          case STOP_GPX:
+            closeMenu(Statistics.EventName.MENU_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable() {
+              public void run() {
+                GpsTracker.stopGpxPlayback();
+              }
+            });
+
+            break;
+          case START_TRACK:
+            closeMenu(Statistics.EventName.MENU_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable() {
+              public void run() {
+                GpsTracker.startTracking();
+              }
+            });
+            break;
+          case STOP_TRACK:
+            closeMenu(Statistics.EventName.MENU_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable() {
+              public void run() {
+                GpsTracker.stopTracking(false);
+              }
+            });
+            break;
+          case CLEAR_TRACK:
+            closeMenu(Statistics.EventName.MENU_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable() {
+              public void run() {
+                GpsTracker.clearTracking();
+              }
+            });
+            break;
+
+          case CANCEL_TRACK:_TRACK:
+            closeMenu(Statistics.EventName.MENU_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable() {
+              public void run() {
+                GpsTracker.stopTracking(true);
+              }
+            });
+            break;
         }
       }
     });
@@ -718,6 +774,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     if (mPlacePage.isDocked())
       mPlacePage.setLeftAnimationTrackListener(mMainMenu.getLeftAnimationTrackListener());
+      */
   }
 
   private void initOnmapDownloader()
@@ -731,7 +788,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   public void onDestroy()
   {
     // TODO move listeners attach-deattach to onStart-onStop since onDestroy isn't guaranteed.
-    Framework.nativeRemoveMapObjectListener();
+    //Framework.nativeRemoveMapObjectListener();
     BottomSheetHelper.free();
     super.onDestroy();
   }
@@ -833,7 +890,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     mPlacePageRestored = mPlacePage.getState() != State.HIDDEN;
     mSearchController.refreshToolbar();
-    mMainMenu.onResume(new Runnable()
+   /* mMainMenu.onResume(new Runnable()
     {
       @Override
       public void run()
@@ -844,7 +901,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
           setFullscreen(true);
         }
       }
-    });
+    });*/
     mOnmapDownloader.onResume();
     mNavigationController.onResume();
   }
@@ -933,11 +990,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onBackPressed()
   {
-    if (getCurrentMenu().close(true))
-    {
+    //if (getCurrentMenu().close(true))
+    //{
       mFadeView.fadeOut();
-      return;
-    }
+    //  return;
+    //}
 
     if (mSearchController.hide())
     {
@@ -946,7 +1003,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
 
     if (!closePlacePage() && !closeSidePanel() &&
-        (mNavigationController != null && !mNavigationController.cancel()) && !closePositionChooser())
+        (mNavigationController != null && !mNavigationController.cancel()) /*&& !closePositionChooser()*/)
     {
       try
       {
@@ -1059,7 +1116,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private BaseMenu getCurrentMenu()
   {
-    return (RoutingController.get().isNavigating() ? mNavigationController.getNavMenu() : mMainMenu);
+    return (RoutingController.get().isNavigating() ? mNavigationController.getNavMenu() : null/*mMainMenu*/);
   }
 
   private void setFullscreen(boolean isFullscreen)
@@ -1136,7 +1193,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     if (isVisible)
     {
-      if (mMainMenu.isAnimating() || mMainMenu.isOpen())
+      /*if (mMainMenu.isAnimating() || mMainMenu.isOpen())
         UiThread.runLater(new Runnable()
         {
           @Override
@@ -1145,7 +1202,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
             if (mMainMenu.close(true))
               mFadeView.fadeOut();
           }
-        }, BaseMenu.ANIMATION_DURATION * 2);
+        }, BaseMenu.ANIMATION_DURATION * 2);*/
     }
     else
     {
@@ -1196,7 +1253,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     if (removeCurrentFragment(true))
     {
-      InputUtils.hideKeyboard(mMainMenu.getFrame());
+      //InputUtils.hideKeyboard(mMainMenu.getFrame());
       mSearchController.refreshToolbar();
     }
   }
@@ -1316,7 +1373,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   public MainMenu getMainMenu()
   {
-    return mMainMenu;
+    return /*mMainMenu*/null;
   }
 
   @Override
@@ -1334,27 +1391,27 @@ public class MwmActivity extends BaseMwmFragmentActivity
     {
       mNavigationController.show(true);
       mSearchController.hide();
-      mMainMenu.setState(MainMenu.State.NAVIGATION, false, mIsFullscreen);
+      //mMainMenu.setState(MainMenu.State.NAVIGATION, false, mIsFullscreen);
       return;
     }
 
     if (mIsFragmentContainer)
     {
-      mMainMenu.setEnabled(MainMenu.Item.P2P, !RoutingController.get().isPlanning());
-      mMainMenu.setEnabled(MainMenu.Item.SEARCH, !RoutingController.get().isWaitingPoiPick());
+      //mMainMenu.setEnabled(MainMenu.Item.P2P, !RoutingController.get().isPlanning());
+      //mMainMenu.setEnabled(MainMenu.Item.SEARCH, !RoutingController.get().isWaitingPoiPick());
     }
     else if (RoutingController.get().isPlanning())
     {
-      mMainMenu.setState(MainMenu.State.ROUTE_PREPARE, false, mIsFullscreen);
+      //mMainMenu.setState(MainMenu.State.ROUTE_PREPARE, false, mIsFullscreen);
       return;
     }
 
-    mMainMenu.setState(MainMenu.State.MENU, false, mIsFullscreen);
+    //mMainMenu.setState(MainMenu.State.MENU, false, mIsFullscreen);
   }
 
   private void adjustMenuLineFrameVisibility()
   {
-    final RoutingController controller = RoutingController.get();
+    /*final RoutingController controller = RoutingController.get();
 
     if (controller.isBuilt() || controller.isUberRequestHandled())
     {
@@ -1368,7 +1425,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       return;
     }
 
-    mMainMenu.showLineFrame(true);
+    mMainMenu.showLineFrame(true);*/
   }
 
   @Override

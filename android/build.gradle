@@ -320,23 +320,26 @@ android {
     exclude 'lib/x86_64/libcrashlytics-envelope.so'
     exclude 'lib/x86_64/libcrashlytics.so'
   }
-  externalNativeBuild {
+
+  /*externalNativeBuild {
     ndkBuild {
       path 'jni/Android.mk'
     }
-  }
+  }*/
 }
 
 // Tasks needed to compile NDK part
-/*apply plugin: 'base'
+apply plugin: 'base'
 
-project.ext.PARAM_PARALLEL_TASK_COUNT = '-j' + (Runtime.runtime.availableProcessors() + 1)
+project.ext.PARAM_PARALLEL_TASK_COUNT = '-j2' /*+ (Runtime.runtime.availableProcessors() + 1)*/
 project.ext.NDK_BUILD = android.getNdkDirectory().toString() + '/ndk-build'
 if (System.properties['os.name'].toLowerCase().contains('windows'))
   project.ext.NDK_BUILD += ".cmd"
 
-def archs = ['x86', 'armeabi-v7a-hard']
+//def archs = ['x86', 'armeabi-v7a-hard']
+def archs = ['x86']
 def buildTypes = [[ndkType: 'release', cppType: "production", flags: propReleaseNdkFlags], [ndkType: 'debug', cppType: "debug", flags: propDebugNdkFlags]]
+//def buildTypes = [[ndkType: 'debug', cppType: "debug", flags: propDebugNdkFlags]]
 
 buildTypes.each { type ->
   def suffix = type.ndkType.capitalize()
@@ -363,7 +366,7 @@ def createNdkBuildTask(buildType, arch, suffix, flags) {
   return tasks.create(name: "ndkBuild${suffix}", dependsOn: "cppBuild${suffix}", type: Exec, description: "Building ${buildType} version of jni. Arch : ${arch}") {
     def ndkParams = ([project.ext.NDK_BUILD, project.ext.PARAM_PARALLEL_TASK_COUNT] + flags.split(' ')).flatten()
     if (!arch.isEmpty())
-      ndkParams += "NDK_ABI_TO_BUILD=${arch}"
+      ndkParams += "NDK_DEBUG=1 NDK_ABI_TO_BUILD=${arch}"
     commandLine ndkParams
   }
 }
@@ -390,7 +393,7 @@ task cppClean(type: Delete) << {
       delete "../../omim-android-${type.cppType}-${arch}"
     }
   }
-}*/
+}
 
 // Tasks for generating obb files for Google Play
 def unalignedFonts = "${propObbFontsOutput}.unaligned"

@@ -1201,13 +1201,13 @@ public class PlacePageView extends RelativeLayout
     Statistics.INSTANCE.trackEvent(Statistics.EventName.EDITOR_ADD_CLICK,
                                    Statistics.params()
                                              .add(Statistics.EventParam.FROM, "placepage"));
-    getActivity().showPositionChooser(true, false);
+    //getActivity().showPositionChooser(true, false);
   }
 
   private void addPlace()
   {
     // TODO add statistics
-    getActivity().showPositionChooser(false, true);
+    //getActivity().showPositionChooser(false, true);
   }
 
   @Override
@@ -1216,7 +1216,7 @@ public class PlacePageView extends RelativeLayout
     switch (v.getId())
     {
       case R.id.ll__place_editor:
-        getActivity().showEditor();
+        //getActivity().showEditor();
         break;
       case R.id.ll__add_organisation:
         addOrganisation();

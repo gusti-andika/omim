@@ -40,7 +40,7 @@
     </FrameLayout>
   </LinearLayout>
 
-  <FrameLayout
+ <!-- <FrameLayout
     android:id="@+id/content_frame"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -52,6 +52,7 @@
       android:background="@color/divider"/>
 
     <include
+        android:id="@+id/menu_content"
       layout="@layout/menu_content"/>
-  </FrameLayout>
+  </FrameLayout>-->
 </LinearLayout>

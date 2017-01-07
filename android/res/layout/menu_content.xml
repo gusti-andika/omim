@@ -62,4 +62,40 @@
     android:drawableLeft="@drawable/ic_menu_share"
     android:text="@string/share_my_location"
     tools:background="#400FF000"/>
+  <!-- test gps tracker -->
+  <TextView
+      android:id="@+id/start_gpx"
+      style="@style/MwmTheme.Menu.Content.ListItem"
+      android:text="start playback"
+      tools:background="#400FF000"/>
+
+  <TextView
+      android:id="@+id/stop_gpx"
+      style="@style/MwmTheme.Menu.Content.ListItem"
+      android:text="stop playback"
+      tools:background="#400FF000"/>
+
+  <TextView
+      android:id="@+id/start_track"
+      style="@style/MwmTheme.Menu.Content.ListItem"
+      android:text="start track"
+      tools:background="#400FF000"/>
+
+  <TextView
+      android:id="@+id/stop_track"
+      style="@style/MwmTheme.Menu.Content.ListItem"
+      android:text="stop track"
+      tools:background="#400FF000"/>
+
+  <TextView
+      android:id="@+id/cancel_track"
+      style="@style/MwmTheme.Menu.Content.ListItem"
+      android:text="cancel track"
+      tools:background="#400FF000"/>
+
+  <TextView
+      android:id="@+id/clear_track"
+      style="@style/MwmTheme.Menu.Content.ListItem"
+      android:text="clear track"
+      tools:background="#400FF000"/>
 </LinearLayout>

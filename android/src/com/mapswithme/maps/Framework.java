@@ -37,6 +37,10 @@ public class Framework
   public static final int ROUTER_TYPE_BICYCLE = 2;
   public static final int ROUTER_TYPE_TAXI = 3;
 
+  public interface TrackerInfoListener {
+   	public void onTrackerInfoUpdated(TrackerController.TrackerInfo info);
+  }
+  
   @SuppressWarnings("unused")
   public interface MapObjectListener
   {
@@ -260,4 +264,5 @@ public class Framework
   public static native String nativeGetActiveObjectFormattedCuisine();
 
   public static native void nativeSetVisibleRect(int left, int top, int right, int bottom);
+  public static native void nativeCaptureMapPNG();
 }

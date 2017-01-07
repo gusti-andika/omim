@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tracker_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/layout_tracker_items"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <include
+            android:id="@+id/avg_speed"
+            layout="@layout/item_tracker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider" />
+
+        <include
+            android:id="@+id/time"
+            layout="@layout/item_tracker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider" />
+
+        <include
+            android:id="@+id/distance"
+            layout="@layout/item_tracker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_tracker_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_margin="10dp"
+        android:layout_below="@+id/layout_tracker_items">
+
+        <TextView
+            android:id="@+id/pauseBtn"
+            style="@style/MwmWidget.Tracker.Start"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="0.8"
+            android:gravity="center"
+            android:text="PAUSE"
+            android:textAppearance="@style/MwmTextAppearance.Toolbar.Title"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:id="@+id/stopBtn"
+            style="@style/MwmWidget.Tracker.Stop"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="0.8"
+            android:gravity="center"
+            android:text="STOP"
+            android:textAppearance="@style/MwmTextAppearance.Toolbar.Title" />
+
+        <Button
+            android:text="capture"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/captureBtn"
+            android:layout_weight="0.8" />
+    </LinearLayout>
+</RelativeLayout>

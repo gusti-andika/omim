@@ -10,6 +10,8 @@
 
   <style name="MwmWidget.Downloader"/>
 
+  <style name="MwmWidget.Tracker"/>
+
   <style name="BottomSheet.Icon">
     <item name="android:layout_width">0dp</item>
     <item name="android:layout_height">0dp</item>
@@ -211,6 +213,42 @@
     <item name="android:paddingRight">2dp</item>
     <item name="android:gravity">center</item>
     <item name="android:background">@drawable/counter</item>
+    <item name="android:textAppearance">@style/MwmTextAppearance.Body3.Light</item>
+    <item name="android:textColor">@color/text_light</item>
+  </style>
+
+  <style name="MwmWidget.Tracker.Go">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:minWidth">20dp</item>
+    <item name="android:minHeight">20dp</item>
+    <item name="android:padding">10dp</item>
+    <item name="android:gravity">center</item>
+    <item name="android:background">@drawable/tracker_go</item>
+    <item name="android:textAppearance">@style/MwmTextAppearance.Body3.Light</item>
+    <item name="android:textColor">@color/text_light</item>
+  </style>
+
+  <style name="MwmWidget.Tracker.Start">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:minWidth">20dp</item>
+    <item name="android:minHeight">20dp</item>
+    <item name="android:padding">10dp</item>
+    <item name="android:gravity">center</item>
+    <item name="android:background">@drawable/tracker_start</item>
+    <item name="android:textAppearance">@style/MwmTextAppearance.Body3.Light</item>
+    <item name="android:textColor">@color/text_light</item>
+  </style>
+
+  <style name="MwmWidget.Tracker.Stop">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:minWidth">20dp</item>
+    <item name="android:minHeight">20dp</item>
+    <item name="android:padding">10dp</item>
+    <item name="android:gravity">center</item>
+    <item name="android:background">@drawable/tracker_stop</item>
     <item name="android:textAppearance">@style/MwmTextAppearance.Body3.Light</item>
     <item name="android:textColor">@color/text_light</item>
   </style>

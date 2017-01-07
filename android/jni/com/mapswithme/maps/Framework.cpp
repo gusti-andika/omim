@@ -1193,8 +1193,16 @@ Java_com_mapswithme_maps_Framework_nativeGetActiveObjectFormattedCuisine(JNIEnv 
 }
 
 JNIEXPORT void JNICALL
-Java_com_mapswithme_maps_Framework_nativeSetVisibleRect(JNIEnv * env, jclass, jint left, jint top, jint right, jint bottom)
+Java_com_mapswithme_maps_Framework_nativeCaptureMapPNG(JNIEnv * env, jclass)
 {
-  frm()->SetVisibleViewport(m2::RectD(left, top, right, bottom));
+  string fileName = my::TimestampToString(time(NULL));
+  fileName += ".png";
+
+  //erase time and date separator
+  fileName.erase(remove(fileName.begin(), fileName.end(), ':'), fileName.end());
+  fileName.erase(remove(fileName.begin(), fileName.end(), '-'), fileName.end());
+
+  frm()->GetDrapeEngine()->CaptureMapPNG(my::JoinFoldersToPath(GetPlatform().TmpDir(), fileName));
 }
+
 }  // extern "C"

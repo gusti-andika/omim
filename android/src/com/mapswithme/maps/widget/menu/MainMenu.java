@@ -128,7 +128,13 @@ public class MainMenu extends BaseMenu
     BOOKMARKS(R.id.bookmarks),
     SHARE(R.id.share),
     DOWNLOADER(R.id.download_maps),
-    SETTINGS(R.id.settings);
+    SETTINGS(R.id.settings),
+    START_GPX(R.id.start_gpx),
+    STOP_GPX(R.id.stop_gpx),
+    START_TRACK(R.id.start_track),
+    STOP_TRACK(R.id.stop_track),
+    CANCEL_TRACK(R.id.cancel_track),
+    CLEAR_TRACK(R.id.clear_track);
 
     private final int mViewId;
 
@@ -220,7 +226,12 @@ public class MainMenu extends BaseMenu
     mapItem(Item.SHARE);
     mapItem(Item.DOWNLOADER);
     mapItem(Item.SETTINGS);
-
+    mapItem(Item.START_GPX);
+    mapItem(Item.STOP_GPX);
+    mapItem(Item.START_TRACK);
+    mapItem(Item.STOP_TRACK);
+    mapItem(Item.CLEAR_TRACK);
+    mapItem(Item.CANCEL_TRACK);
     adjustCollapsedItems();
     setState(State.MENU, false, false);
   }

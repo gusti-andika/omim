@@ -1,5 +1,4 @@
 #include "Framework.hpp"
-#include "map/gps_tracker.hpp"
 #include "platform/file_logging.hpp"
 
 extern "C"
