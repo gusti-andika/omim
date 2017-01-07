@@ -16,6 +16,8 @@
 #include "std/sstream.hpp"
 #include "std/target_os.hpp"
 
+#include "coding/file_name_utils.hpp"
+
 #include <QtGui/QCloseEvent>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -471,6 +473,11 @@ void MainWindow::OnPlayGpx()
         QString fileName = QFileDialog::getOpenFileName(this,
                     tr("Open GPX"), tr(home.c_str()),
                     tr("GPX Files (*.gpx)"));
+        if (fileName.isNull()) {
+            m_runGpxPlayback->setChecked(false);
+            return;
+        }
+
         m_gpxPlayback.reset(new gpx::GpxPlayback(fileName.toStdString()));
         m_gpxPlayback->SetOnLocationUpdateCallback(std::bind(&MainWindow::OnLocationUpdated, this, _1));
         m_gpxPlayback->Play();
@@ -502,14 +509,14 @@ void MainWindow::OnLocationUpdated(location::GpsInfo const & info)
 
 void MainWindow::OnTrackingStarted()
 {
-    m_startTrackerAction->setEnabled(false);
+    //m_startTrackerAction->setEnabled(false);
     m_stopTrackerAction->setEnabled(true);
     m_cancelTrackerAction->setEnabled(true);
 }
 
 void MainWindow::OnTrackingStopped(bool cancel)
 {
-    m_startTrackerAction->setEnabled(true);
+    //m_startTrackerAction->setEnabled(true);
     m_stopTrackerAction->setEnabled(false);
     m_cancelTrackerAction->setEnabled(false);
 }
@@ -646,12 +653,28 @@ void MainWindow::OnShowTrackerList()
 
 void MainWindow::OnTrackerStart()
 {
-    m_pDrawWidget->GetFramework().GetGpsTracker().Start();
+
+    if (m_pDrawWidget->GetFramework().GetGpsTracker().IsStarted()) {
+        m_pDrawWidget->GetFramework().GetGpsTracker().Pause();
+        m_startTrackerAction->setText(tr("Resume"));
+    } else {
+        m_pDrawWidget->GetFramework().GetGpsTracker().Start();
+        m_startTrackerAction->setText(tr("Pause"));
+    }
 }
 
 void MainWindow::OnTrackerStop()
 {
     m_pDrawWidget->GetFramework().GetGpsTracker().Stop();
+    /** commented out as the map capture worked but the resulted
+     * image rendered on tracked path not complete as the render process
+     * itself not yet complete. Need to figured out how to call capture once
+     * the tile render is complete **/
+    //string filename = my::TimestampToString(time(NULL));
+    //filename += ".png";
+    //filename.erase(std::remove(filename.begin(), filename.end(),':'), filename.end());
+    //filename.erase(std::remove(filename.begin(), filename.end(),'-'), filename.end());
+    //m_pDrawWidget->GetFramework().GetDrapeEngine()->CaptureMapPNG(my::JoinFoldersToPath(GetPlatform().TmpDir(), filename));
 }
 
 void MainWindow::OnTrackerCancel()
