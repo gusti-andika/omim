@@ -13,20 +13,24 @@
 #include "defines.hpp"
 #include "base/logging.hpp"
 
-#include <ctime>
+#include "geometry/distance_on_sphere.hpp"
+
+#define SET_STATE(state)        \
+    m_prevState = m_state;      \
+    m_state = state;
+
 namespace
 {
 
 char const kEnabledKey[] = "GpsTrackingEnabled";
-char const kDurationHours[] = "GpsTrackingDuration";
-uint32_t constexpr kDefaultDurationHours = 24;
-
-size_t constexpr kMaxItemCount = 100000; // > 24h with 1point/s
 
 inline string GetFilePath()
 {
-  string fileName = my::TimestampToString(time(NULL)) + ".dat";
-  return my::JoinFoldersToPath(GetPlatform().WritableDir(), fileName);
+  string fileName = my::TimestampToString(time(NULL));
+  fileName += ".png";
+  fileName.erase(remove(fileName.begin(), fileName.end(), ':'), fileName.end());
+  fileName.erase(remove(fileName.begin(), fileName.end(), '-'), fileName.end());
+  return my::JoinFoldersToPath(GetPlatform().TmpDir(), fileName);
 }
 
 inline bool GetSettingsIsEnabled()
@@ -41,33 +45,18 @@ inline void SetSettingsIsEnabled(bool enabled)
   settings::Set(kEnabledKey, enabled);
 }
 
-inline hours GetSettingsDuration()
-{
-  uint32_t duration = kDefaultDurationHours;
-  settings::Get(kDurationHours, duration);
-  return hours(duration);
-}
-
-inline void SetSettingsDuration(hours duration)
-{
-  uint32_t const hours = duration.count();
-  settings::Set(kDurationHours, hours);
-}
-
 } // namespace
 
 GpsTracker::GpsTracker(Framework &framework)
   : UserMarkContainer(0.0, UserMarkType::BOOKMARK_MARK,  framework)
   , m_enabled(GetSettingsIsEnabled())
   , m_listener(nullptr)
-  , m_started(false)
   , m_hasStartPoint(false)
 {
 }
 
 GpsTracker::~GpsTracker()
 {
-
 }
 
 void GpsTracker::SetEnabled(bool enabled)
@@ -77,9 +66,6 @@ void GpsTracker::SetEnabled(bool enabled)
 
   SetSettingsIsEnabled(enabled);
   m_enabled = enabled;
-
-  if (enabled && m_track)
-    m_track->Clear();
 }
 
 bool GpsTracker::IsEnabled() const
@@ -87,70 +73,72 @@ bool GpsTracker::IsEnabled() const
   return m_enabled;
 }
 
-void GpsTracker::SetDuration(hours duration)
+void GpsTracker::SetOnTrackerInfo(const TOnTrackerInfo &fn)
 {
-  SetSettingsDuration(duration);
-  if(m_track)
-    m_track->SetDuration(duration);
-}
-
-hours GpsTracker::GetDuration() const
-{
-  return m_track ? m_track->GetDuration() : hours(0) ;
-}
-
-void GpsTracker::Connect(TGpsTrackDiffCallback const & fn)
-{
-  m_trackDiffCallback = fn;
-  if (m_track)
-    m_track->SetCallback(fn);
-}
-
-void GpsTracker::Disconnect()
-{
-  if(m_track)
-    m_track->SetCallback(nullptr);
+    m_OnTrackerInfo = fn;
 }
 
 void GpsTracker::OnLocationUpdated(location::GpsInfo const & info)
 {
   lock_guard<mutex> guard(m_mutex);
-  if (!m_enabled || !m_track || !m_started)
+  if (!m_enabled)
     return;
 
-  m_track->AddPoint(info);
+  if (!IsStarted())
+      return;
+
+  if (m_prevState == STATE_PAUSED) {
+      LOG(LDEBUG, ("SetPausePointMark:", info));
+      SetPausePointMark(info);
+      m_prevState = STATE_EMPTY;
+  }
+
+  if (m_hasStartPoint) {
+      CalcTrackerInfo(info);
+  }
+
   if (!m_hasStartPoint) {
     SetStartPointMark(info);
     m_hasStartPoint = true;
   }
 
   m_lastPoint = info;
+
+  vector<df::GpsTrackPoint> pointsAdd;
+  vector<uint32_t> indicesRemove;
+  {
+    df::GpsTrackPoint pt;
+    pt.m_id = 0;
+    pt.m_speedMPS = info.m_speed;
+    pt.m_timestamp = info.m_timestamp;
+    pt.m_point = MercatorBounds::FromLatLon(info.m_latitude, info.m_longitude);
+    pointsAdd.emplace_back(pt);
+  }
+
+  m_engine->UpdateGpsTrackPoints(move(pointsAdd), move(indicesRemove));
+
 }
 
 void GpsTracker::Load(string const & trackFile)
 {
     lock_guard<mutex> guard(m_mutex);
-    m_started = false;
+    SET_STATE(STATE_EMPTY);
     m_engine->ClearGpsTrackPoints();
-    m_track.reset(new GpsTrack(trackFile,
-                               kMaxItemCount,
-                               GetSettingsDuration(),
-                               make_unique<GpsTrackNullFilter>()));
-
-    m_track->SetCallback(m_trackDiffCallback);
 }
 
 void GpsTracker::Start()
 {
     lock_guard<mutex> guard(m_mutex);
-    if(m_started)
+    if(IsStarted())
         return;
-    m_track.reset(new GpsTrack(GetFilePath(),
-                               kMaxItemCount,
-                               GetSettingsDuration(),
-                               make_unique<GpsTrackNullFilter>()));
-    m_track->SetCallback(m_trackDiffCallback);
-    m_started = true;
+
+    if (IsPaused()) {
+        SET_STATE(STATE_STARTED);
+        return;
+    }
+
+    SET_STATE(STATE_STARTED);
+
     if (m_listener)
         m_listener->OnTrackingStarted();
 }
@@ -158,18 +146,19 @@ void GpsTracker::Start()
 void GpsTracker::Stop()
 {
     lock_guard<mutex> guard(m_mutex);
-    if (!m_started || !m_track)
+    if (IsStopped())
         return;
 
-    m_track->Save();
-    m_track.reset();
+    m_speeds.clear();
+    m_speeds.shrink_to_fit();
 
     SetEndPointMark(m_lastPoint);
 
-    //m_engine->LoseLocation();
+    m_engine->LoseLocation();
     m_engine->ShowGpsTrackPointsRect();
 
-    m_started = false;
+    SET_STATE(STATE_STOPPED);
+
     m_hasStartPoint = false;
     if (m_listener)
         m_listener->OnTrackingStopped();
@@ -178,23 +167,52 @@ void GpsTracker::Stop()
 void GpsTracker::Cancel()
 {
     lock_guard<mutex> guard(m_mutex);
-    if (!m_started)
+    if (IsStopped())
         return;
 
     ClearMarks();
     m_engine->ClearGpsTrackPoints();
 
-    m_track.reset();
+    m_speeds.clear();
+    m_speeds.shrink_to_fit();
 
     if (m_listener)
         m_listener->OnTrackingStopped(true);
-    m_started = false;
+
+    SET_STATE(STATE_STOPPED);
+
     m_hasStartPoint = false;
+}
+
+void GpsTracker::Pause()
+{
+    lock_guard<mutex> guard(m_mutex);
+    if (!IsStarted())
+        return;
+
+    SET_STATE(STATE_PAUSED);
+    m_engine->PauseGpsTrackPoints();
+    SetPausePointMark(m_lastPoint);
 }
 
 bool GpsTracker::IsStarted()
 {
-    return m_started;
+    return m_state == STATE_STARTED;
+}
+
+bool GpsTracker::IsStopped()
+{
+    return m_state == STATE_STOPPED;
+}
+
+bool GpsTracker::IsPaused()
+{
+    return m_state == STATE_PAUSED;
+}
+
+GpsTracker::ETrackerState GpsTracker::GetState()
+{
+    return m_state.load();
 }
 
 void GpsTracker::SetStartPointMark(const location::GpsInfo &info)
@@ -204,6 +222,15 @@ void GpsTracker::SetStartPointMark(const location::GpsInfo &info)
     guard.m_controller.SetIsVisible(true);
     guard.m_controller.SetIsDrawable(true);
     static_cast<Bookmark *>(CreateUserMark(point))->SetData(BookmarkData("","route_from"));
+}
+
+void GpsTracker::SetPausePointMark(const location::GpsInfo &info)
+{
+    Guard guard(*this);
+    m2::PointD point = MercatorBounds::FromLatLon(info.m_latitude, info.m_longitude);
+    guard.m_controller.SetIsVisible(true);
+    guard.m_controller.SetIsDrawable(true);
+    static_cast<Bookmark *>(CreateUserMark(point))->SetData(BookmarkData("","route_pause"));
 }
 
 void GpsTracker::SetEndPointMark(const location::GpsInfo &info)
@@ -220,11 +247,29 @@ void GpsTracker::ClearMarks()
     m_engine->ClearGpsTrackPoints();
 }
 
-
 UserMark * GpsTracker::AllocateUserMark(m2::PointD const & ptOrg)
 {
   return new Bookmark(ptOrg, this);
 }
 
+void GpsTracker::CalcTrackerInfo(location::GpsInfo const &info)
+{
+    m_trackerInfo.distance += ms::DistanceOnEarth(info.m_latitude, info.m_longitude,
+                                                  m_lastPoint.m_latitude, m_lastPoint.m_longitude);
+    m_trackerInfo.lastSpeed = info.m_speed;
 
+    m_speeds.push_back(info.m_speed);
+    if (m_speeds.size() > 1) {
+        size_t size = m_speeds.size();
+        double sum = 0;
+        std::for_each(m_speeds.begin(), m_speeds.end(),
+                      [&](double const &s){
+            sum+=s;
+        });
 
+        m_trackerInfo.avgSpeed = sum/size;
+    }
+
+    if (m_OnTrackerInfo)
+        m_OnTrackerInfo(m_trackerInfo);
+}

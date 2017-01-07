@@ -1,6 +1,5 @@
 #pragma once
 
-#include "map/gps_track.hpp"
 #include "map/user_mark_container.hpp"
 
 #include "std/atomic.hpp"
@@ -20,6 +19,25 @@ class Framework;
 class GpsTracker : public UserMarkContainer
 {
 public:
+
+    struct TrackerInfo{
+        double avgSpeed;
+        double lastSpeed;
+        double distance;
+        string time;
+
+        TrackerInfo() = default;
+        TrackerInfo(TrackerInfo const &) = default;
+        TrackerInfo & operator=(TrackerInfo const &) = default;
+
+    };
+
+    enum ETrackerState {
+        STATE_EMPTY = 0,
+        STATE_STARTED,
+        STATE_PAUSED,
+        STATE_STOPPED
+    } ;
 
     class ActivationListener
     {
@@ -47,32 +65,31 @@ public:
         GpsTracker &m_tracker;
     };
 
-  //static GpsTracker & Instance();
-
   GpsTracker(Framework &framework);
   ~GpsTracker();
 
   bool IsEnabled() const;
   void SetEnabled(bool enabled);
 
-  hours GetDuration() const;
-  void SetDuration(hours duration);
+  using TOnTrackerInfo = std::function<void(const TrackerInfo &info)>;
 
-  using TGpsTrackDiffCallback = std::function<void(vector<pair<size_t, location::GpsTrackInfo>> && toAdd,
-                                                   pair<size_t, size_t> const & toRemove)>;
-
-  void Connect(TGpsTrackDiffCallback const & fn);
-  void Disconnect();
+  void SetOnTrackerInfo(TOnTrackerInfo const &fn);
 
   void Load(string const & trackFile);
 
   void Start();
   void Stop();
+  void Pause();
   void Cancel();
+  ETrackerState GetState();
 
   void OnLocationUpdated(location::GpsInfo const & info);
 
   bool IsStarted();
+
+  bool IsPaused();
+
+  bool IsStopped();
 
   void SetEngine(ref_ptr<df::DrapeEngine> drape) {
       m_engine = drape;
@@ -83,6 +100,8 @@ public:
   }
   void SetStartPointMark(location::GpsInfo const &info);
   void SetEndPointMark(location::GpsInfo const &info);
+  void SetPausePointMark(location::GpsInfo const &info);
+
   void ClearMarks();
 
 protected:
@@ -91,14 +110,19 @@ protected:
 private:
   DISALLOW_COPY_AND_MOVE(GpsTracker);
 
-  TGpsTrackDiffCallback m_trackDiffCallback;
+  void CalcTrackerInfo(location::GpsInfo const &info);
+
+  TOnTrackerInfo m_OnTrackerInfo;
   atomic<bool> m_enabled;
-  unique_ptr<GpsTrack> m_track;
+
   ref_ptr<df::DrapeEngine> m_engine;
   ActivationListener *m_listener = nullptr;
-  atomic<bool> m_started;
+  atomic<ETrackerState> m_state{STATE_EMPTY};
+  ETrackerState m_prevState{STATE_EMPTY};
   mutex m_mutex;
 
   bool m_hasStartPoint;
   location::GpsInfo m_lastPoint;
+  TrackerInfo m_trackerInfo = {0,0,0,""};
+  vector<double> m_speeds;
 };

@@ -460,8 +460,9 @@ private:
   void LoadViewport();
 
 public:
-  void ConnectToGpsTracker();
-  void DisconnectFromGpsTracker();
+
+  //void ConnectToGpsTracker();
+  //void DisconnectFromGpsTracker();
 
   void SetMapStyle(MapStyle mapStyle);
   void MarkMapStyle(MapStyle mapStyle);
@@ -515,8 +516,8 @@ private:
   bool QueryMayBeSkipped(SearchIntent const & intent, search::SearchParams const & params,
                          m2::RectD const & viewport) const;
 
-  void OnUpdateGpsTrackPointsCallback(vector<pair<size_t, location::GpsTrackInfo>> && toAdd,
-                                      pair<size_t, size_t> const & toRemove);
+  //void OnUpdateGpsTrackPointsCallback(vector<pair<size_t, location::GpsTrackInfo>> && toAdd,
+  //                                    pair<size_t, size_t> const & toRemove);
 
 public:
   using TSearchRequest = search::QuerySaver::TSearchRequest;

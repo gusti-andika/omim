@@ -137,7 +137,8 @@ vector<string> kSearchMarks =
 // To adjust GpsTrackFilter was added secret command "?gpstrackaccuracy:xxx;"
 // where xxx is a new value for horizontal accuracy.
 // This is temporary solution while we don't have a good filter.
-void ParseSetGpsTrackMinAccuracyCommand(string const & query)
+// Currently not needed, gps tracker won't use filter
+/*void ParseSetGpsTrackMinAccuracyCommand(string const & query)
 {
   const char kGpsAccuracy[] = "?gpstrackaccuracy:";
   if (strings::StartsWith(query, kGpsAccuracy))
@@ -153,7 +154,7 @@ void ParseSetGpsTrackMinAccuracyCommand(string const & query)
       }
     }
   }
-}
+}*/
 
 // Cancels search query by |handle|.
 void CancelQuery(weak_ptr<search::ProcessorHandle> & handle)
@@ -1368,7 +1369,7 @@ bool Framework::Search(search::SearchParams const & params)
   search::SearchParams const & rParams = params;
 #endif
 
-  ParseSetGpsTrackMinAccuracyCommand(params.m_query);
+  //ParseSetGpsTrackMinAccuracyCommand(params.m_query);
   if (ParseEditorDebugCommand(params))
     return true;
 
@@ -1680,8 +1681,8 @@ void Framework::CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory,
       m_drapeEngine->EnablePerspective();
   }
 
-  if (m_connectToGpsTrack)
-    m_gpsTracker.Connect(bind(&Framework::OnUpdateGpsTrackPointsCallback, this, _1, _2));
+  //if (m_connectToGpsTrack)
+    //m_gpsTracker.Connect(bind(&Framework::OnUpdateGpsTrackPointsCallback, this, _1, _2));
 
   m_drapeEngine->RequestSymbolsSize(kSearchMarks, [this](vector<m2::PointU> const & sizes)
   {
@@ -1716,7 +1717,7 @@ ref_ptr<df::DrapeEngine> Framework::GetDrapeEngine()
 
 void Framework::DestroyDrapeEngine()
 {
-  m_gpsTracker.Disconnect();
+  //m_gpsTracker.Disconnect();
   m_drapeEngine.reset();
 }
 
@@ -1734,6 +1735,7 @@ void Framework::SetRenderingDisabled(bool destroyContext)
     m_drapeEngine->SetRenderingDisabled(destroyContext);
 }
 
+/*
 void Framework::ConnectToGpsTracker()
 {
   if (m_drapeEngine)
@@ -1778,7 +1780,7 @@ void Framework::OnUpdateGpsTrackPointsCallback(vector<pair<size_t, location::Gps
 
 
   m_drapeEngine->UpdateGpsTrackPoints(move(pointsAdd), move(indicesRemove));
-}
+}*/
 
 void Framework::SetFontScaleFactor(double scaleFactor)
 {
